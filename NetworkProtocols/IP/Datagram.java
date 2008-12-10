@@ -1,5 +1,7 @@
 package NetworkProtocols.IP;
 
+import java.util.Vector;
+
 import Exceptions.*; 
 import NetworkProtocols.IP.Address.*;
 
@@ -32,6 +34,7 @@ public class Datagram {
   private byte[] message;		//Bytes del mensaje a ser enviado --200 bytes (longitud para prueba)
   								//OJO!!! no hay nada implementado para tratar estos bytes
   
+  int MTU   ;   // debe ser como minimo 68 bytes (total del header). Longitud en bits. 
   // Dada la representacion interna del frame IP, devuelve su formato en bits para la transmision
   public byte[] toByte()  {
     byte[] b = new byte[220];
@@ -74,7 +77,7 @@ public class Datagram {
     return b;
   }
 
-  // Devuelva la representaci�n interna del datagram IP, dado un arreglo de bytes
+  // Devuelva la representaci�n interna del datagram IP, dado un arreglo de bytes
   public Datagram(byte[] byt) {
     version=(int)(byt[0]&0xf0);
     version = version >> 4;
@@ -344,5 +347,115 @@ public class Datagram {
   }                  	
 }
 
+/*
+ * Es el checksum de la cabecera. Se calcula como el complemento a uno 
+ * de la suma de los complementos a uno de todas las palabras de 16 bits 
+ * de la cabecera. Con el fin de este cálculo, el campo checksum se supone cero. 
+ * Si el checksum de la cabecera no se corresponde con los contenidos, el 
+ * datagrama se desecha, ya que al menos un bit de la cabecera está corrupto, 
+ * y el datagrama podría haber llegado al destino equivocado.
+ */
+
+
+public Vector<Datagram> fragmentar()
+{
+	Vector<Datagram> v = new Vector<Datagram>(); 
+	
+	if(flags_fragm)
+	{
+		if ( ( this.totalLength ) < MTU ) //  si el Maximo permitido es mayor al tamaño del paquete envio el mismo datagrama.
+			{
+				v.addElement(this);
+				return v;
+			}
+		else // sino tengo que fragmentar. 
+		{
+			int longitudCabecera = totalLenght - message.length ;
+			int longitudFragmento = MTU - longitudCabecera;
+			
+			int totalDatagramas = 0;
+			int orden = 0; 
+			if ( (message.length % longitudFragmento) > 0)
+			
+				totalDatagramas = message.length / longitudFragmento + 1 ;
+			
+			else
+				totalDatagramas = message.length / longitudFragmento;
+			
+			for (int i = 0; i < totalDatagramas ; i++)
+				{
+					if (i == totalDatagramas - 1)
+					{
+						int datagramaFinal = message.length % longitudFragmento;	
+						Datagram fragmento = generarFramento( i, orden,datagramaFinal ,true); 
+						orden += longitudFragmento;
+						v.addElement(this);
+					}
+					else
+					{
+						Datagram fragmento = generarFramento( i, orden, longitudFragmento,false); 
+						orden += longitudFragmento;
+						v.addElement(this);
+					}
+				
+				}	
+		}
+		return v;
+	}	
+	else 
+	{
+		return null;
+	}	
+}
+
+
+public Datagram generarFramento(int i,int orden,int longitudFragmento,boolean esUltimo)
+{
+	byte[MTU] contenidoFragmento;
+	contenidoFragmento[0] = (byte) ( (version << 4) + ihl);
+	contenidoFragmento[1] = (byte)((precedence<<5)+delay+throughput+reliability+cost+unused);
+	//bytes del Id del datagrama
+	contenidoFragmento[2] = (byte) (i>>8);      
+	contenidoFragmento[3] = (byte) (i & 0x00ff);
+	contenidoFragmento[4] = (byte) (i>>8);
+	contenidoFragmento[5] = (byte) (i & 0x00ff);
+	//bytes de flags y offset del subdatagrama
+	byte x1=x2=x3=0;
+    if(flags_nousado) x1=(byte)0x80;
+    if(esUltimo) x2 = (byte) x2=64;
+    x3=32;
+    x4 = (byte) ((orden>>8)& 0x001f);
+    contenidoFragmento[6] = (byte)(x1+x2+x3+x4); // 3 bits de flag y primeros 5 bits de offset del fragmento
+    contenidoFragmento[7] = (byte) (orden & 0x00ff);
+   
+    contenidoFragmento[8] = (byte) (ttl & 0x00ff);
+    contenidoFragmento[9] = (byte) (protocol & 0x00ff);
+    contenidoFragmento[10] = (byte) (checksum>>8);
+    contenidoFragmento[11] = (byte) (checksum & 0x00ff);
+    byte[] xx = new byte[4];
+    xx = sourceAddress.toByte();
+    contenidoFragmento[12] = xx[0];
+    contenidoFragmento[13] = xx[1];
+    contenidoFragmento[14] = xx[2];
+    contenidoFragmento[15] = xx[3];
+    xx = destAddress.toByte();
+    contenidoFragmento[16] = xx[0];
+    contenidoFragmento[17] = xx[1];
+    contenidoFragmento[18] = xx[2];
+    contenidoFragmento[19] = xx[3];
+	
+    for (int j = 0 ; j < longitudFragmento; j++)
+    {
+    	contenidoFragmento[20+j] = message[orden+j];
+    }
+        
+    Datagram fragmento = new Datagram(contenidoFragmento);
+    fragmento.genChecksum();
+    return fragmento;
+}
+
+public void reemsamblar(Vector v)
+{
+}
 
 
