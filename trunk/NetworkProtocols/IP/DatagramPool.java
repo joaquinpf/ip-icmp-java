@@ -9,6 +9,14 @@ public class DatagramPool {
 	
 	private Map<String,FragmentPool> datagrams = new HashMap<String, FragmentPool>();
 	
+	/**
+	 * Agrega un datagrama entrante al pool.
+	 * Su ID se genera como MD5(source adress + dest adress + protocol + datagram id), si ya existe en el pool se utiliza
+	 * para almacenar el fragmento. 
+	 * Una vez que el fragmento es almacenado se debe comprobar si se logro completar el datagrama al que pertenece. Si
+	 * ese fuera el caso, se remueve del pool y se envia al nivel superior.
+	 * @param incoming
+	 */
 	public synchronized void addDatagram(Datagram incoming){
 		String md5;
 		try {

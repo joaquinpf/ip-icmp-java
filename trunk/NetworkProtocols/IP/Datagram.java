@@ -8,34 +8,133 @@ import NetworkProtocols.IP.Address.IpAddress;
 
 public class Datagram {
 
-	private int version;         // Version de IP (4) (4 bits)
-	private int ihl;             // Longitud del header en multiplos de 4 bytes (4 bits)
+	/**
+	 * Version de IP (4) (4 bits)
+	 */
+	private int version;         
+	
+	/**
+	 * Longitud del header en multiplos de 4 bytes (4 bits)
+	 */
+	private int ihl;              
 	// Tipo de servicio  (8 bits)
-	private int precedence;  // Precedencia, 3 bits
-	private boolean delay;       // demora (1 bit)
-	private boolean throughput;  // throughput (1 bit)
-	private boolean reliability; // confiabilidad (1 bit)
-	private boolean cost;        // costo (1 bit)
-	private boolean unused;      // no usado (1 bit)
-	private int totalLength;     // Longitud total del datagram en bytes (16 bits)
-	private int datagramId;      // Identificacion unica del datagram  (16 bits)
+	
+	/**
+	 * Precedencia, 3 bits
+	 */
+	private int precedence; 
+	
+	/**
+	 * demora (1 bit)
+	 */
+	private boolean delay;        
+	
+	/**
+	 * throughput (1 bit)
+	 */
+	private boolean throughput; 
+	
+	/**
+	 * confiabilidad (1 bit)
+	 */
+	private boolean reliability; 
+	
+	/**
+	 * costo (1 bit)
+	 */
+	private boolean cost;       
+	
+	/**
+	 * no usado (1 bit)
+	 */
+	private boolean unused;      
+	
+	/**
+	 * Longitud total del datagram en bytes (16 bits)
+	 */
+	private int totalLength;     
+	
+	/**
+	 * Identificacion unica del datagram  (16 bits)
+	 */
+	private int datagramId;     
 	// Flags (3 bits)
-	private boolean flags_nousado;   // No usado (1 bit) primero no usado
-	private boolean flags_ultfrag;   // (1 bit) segundo true si es ultimo fragmento
-	private boolean flags_fragm;     // (1 bit) tercero true si es posible fragmentar el datagram
-	private int fragOffset;      // Offset de este fragmento en el datagram completo (13 bits)
-	private int ttl;             // Tiempo de vida  (8 bits)
-	private int protocol;        // Protocolo encapsulado en IP  (8 bits)
-	private int checksum;        // Checksum del datagram  (16 bits)
-	private IpAddress sourceAddress;   // Direccion origen  (32 bits)
-	private IpAddress destAddress;     // Direccion destino  (32 bits)
-	private byte[] options;         // Opciones (hasta bits)
-	private byte[] pad;             // Relleno  (completa a multiplo de bits)
-	private byte[] payload;         // payload del datagram (hasta 65535 bytes menos header)
-	private byte[] message;		//Bytes del mensaje a ser enviado --200 bytes (longitud para prueba)
-	//OJO!!! no hay nada implementado para tratar estos bytes
+	
+	/**
+	 * No usado (1 bit) primero no usado
+	 */
+	private boolean flags_nousado;   
+	
+	/**
+	 * (1 bit) segundo true si es ultimo fragmento
+	 */
+	private boolean flags_ultfrag;   
+	
+	/**
+	 * (1 bit) tercero true si es posible fragmentar el datagram
+	 */
+	private boolean flags_fragm;     
+	
+	/**
+	 * Offset de este fragmento en el datagram completo (13 bits)
+	 */
+	private int fragOffset;      
+	
+	/**
+	 * Tiempo de vida  (8 bits)
+	 */
+	private int ttl;             
+	
+	/**
+	 * Protocolo encapsulado en IP  (8 bits)
+	 */
+	private int protocol;        
 
-	// Dada la representacion interna del frame IP, devuelve su formato en bits para la transmision
+	/**
+	 * Checksum del datagram  (16 bits)
+	 * Es el checksum de la cabecera. Se calcula como el complemento a uno 
+	 * de la suma de los complementos a uno de todas las palabras de 16 bits 
+	 * de la cabecera. Con el fin de este cálculo, el campo checksum se supone cero. 
+	 * Si el checksum de la cabecera no se corresponde con los contenidos, el 
+	 * datagrama se desecha, ya que al menos un bit de la cabecera está corrupto, 
+	 * y el datagrama podría haber llegado al destino equivocado.
+	 */
+	private int checksum;   
+	
+	/**
+	 * Direccion origen  (32 bits)
+	 */
+	private IpAddress sourceAddress;   
+	
+	/**
+	 * Direccion destino  (32 bits)
+	 */
+	private IpAddress destAddress;     
+	
+	/**
+	 * Opciones (hasta bits)
+	 */
+	private byte[] options;         
+	
+	/**
+	 * Relleno  (completa a multiplo de bits)
+	 */
+	private byte[] pad;             
+	
+	/**
+	 * payload del datagram (hasta 65535 bytes menos header)
+	 */
+	private byte[] payload;          
+	
+	/**
+	 * Bytes del mensaje a ser enviado
+	 */
+	private byte[] message;
+
+	/**
+	 * Dada la representacion interna del frame IP, devuelve su formato en bits para la transmision
+	 * @return
+	 */
 	public byte[] toByte()  {
 		byte[] b = new byte[(ihl * 4) + message.length];
 		b[0] = (byte) ( (version << 4) + ihl);
@@ -83,7 +182,10 @@ public class Datagram {
 		return b;
 	}
 
-	// Devuelva la representaci�n interna del datagram IP, dado un arreglo de bytes
+	/**
+	 * Devuelva la representaci�n interna del datagram IP, dado un arreglo de bytes
+	 * @param byt
+	 */
 	public Datagram(byte[] byt) {
 		version=(int)(byt[0]&0xf0);
 		version = version >> 4;
@@ -161,8 +263,30 @@ public class Datagram {
 		System.arraycopy(byt, (ihl * 4), message, 0, byt.length - (ihl * 4));
 	}
 
-	// Crea un datagram a partir del valor de sus campos. Produce una inetrrupcion si los valores de
-	// los campos estan fuera de rango (no chequea validez de los campos)
+	/**
+	 * Crea un datagram a partir del valor de sus campos. Produce una inetrrupcion si los valores de
+	 * los campos estan fuera de rango (no chequea validez de los campos)
+	 * @param vers
+	 * @param hedlen
+	 * @param prec
+	 * @param del
+	 * @param thr
+	 * @param rel
+	 * @param cos
+	 * @param notus
+	 * @param ttol
+	 * @param did
+	 * @param fnu
+	 * @param fuf
+	 * @param frg
+	 * @param off
+	 * @param tl
+	 * @param prt
+	 * @param chk
+	 * @param sou
+	 * @param des
+	 * @param options
+	 */
 	public Datagram(int vers, int hedlen, int prec, boolean del, boolean thr, boolean rel, boolean cos,
 			boolean notus, int ttol, int did, boolean fnu, boolean fuf, boolean frg, int off,
 			int tl, int prt, int chk, IpAddress sou, IpAddress des, byte[] options) {
@@ -212,6 +336,10 @@ public class Datagram {
 		}
 	}
 
+	/**
+	 * Retorna los bytes del header del datagrama
+	 * @return
+	 */
 	public byte[] getHeaderBytes()  {
 		byte[] b = new byte[(ihl*4) + options.length + pad.length];
 		b[0] = (byte) ( (version << 4) + ihl);
@@ -260,7 +388,10 @@ public class Datagram {
 		return b;
 	}
 
-	// Verifica que el checksum del header sea correcto. Si lo es devuelve true
+	/**
+	 * Verifica que el checksum del header sea correcto. Si lo es devuelve true
+	 * @return
+	 */
 	public boolean verifyChecksum() {
 		int lg = this.ihl * 4;  // Longitud del header IP
 		byte[] b = new byte[lg];
@@ -275,7 +406,10 @@ public class Datagram {
 			return false;
 	}
 
-	// Genera el checksum del header. Ademas de cambiarlo en el datagram, devuelve su resultado
+	/**
+	 * Genera el checksum del header. Ademas de cambiarlo en el datagram, devuelve su resultado
+	 * @return
+	 */
 	public int genChecksum() {
 		int lg = this.ihl * 4;  // Longitud del header IP
 		byte[] b = new byte[lg];
@@ -290,7 +424,11 @@ public class Datagram {
 		return ck;
 	}
 
-	// Prueba de checksum, lo genera a partir de un grupo de bytes dado
+	/**
+	 * Prueba de checksum, lo genera a partir de un grupo de bytes dado
+	 * @param b
+	 * @return
+	 */
 	public int pruebaChecksum(byte[] b) {
 		int lg = b.length;
 		int ck = 0;
@@ -301,10 +439,10 @@ public class Datagram {
 		return ck;
 	}
 
-
-
-	// Genera un checksum erroneo del header. Ademas de cambiarlo en el datagram, devuelve su resultado
-	// Se utiliza para pruebas
+	/**
+	 * Genera un checksum erroneo del header. Ademas de cambiarlo en el datagram, devuelve su resultado
+	 * Se utiliza para pruebas
+	 */
 	public int genBadChecksum() {
 		int lg = this.ihl * 4;  // Longitud del header IP
 		byte[] b = new byte[lg];
@@ -318,6 +456,41 @@ public class Datagram {
 		return ck;
 	}
 
+	/**
+	 * Datagram formateado
+	 */
+	public String toString() {
+
+		String dtrcu= "";
+		if(delay) dtrcu=dtrcu+"D"; else dtrcu=dtrcu+"-";
+		if(throughput) dtrcu=dtrcu+"T"; else dtrcu=dtrcu+"-";
+		if(reliability) dtrcu=dtrcu+"R"; else dtrcu=dtrcu+"-";
+		if(cost) dtrcu=dtrcu+"C"; else dtrcu=dtrcu+"-";
+		if(unused) dtrcu=dtrcu+"U"; else dtrcu=dtrcu+"-";
+		String fff="";
+		if(flags_nousado) fff=fff+"T,"; else fff=fff+"F,";
+		if(flags_ultfrag) fff=fff+"LF,"; else fff=fff+"-,";
+		if(flags_fragm) fff=fff+"DNTF"; else fff=fff+"-";
+		String fip = "DG IP: V:"+version+" HL:"+ihl+" TOS-P:"+precedence+"-"+dtrcu+" TLN:"+totalLength+
+		" DGId:"+datagramId+" Flg:"+fff+" OFF:"+fragOffset+" TTL:"+ttl+" PROT:"+protocol+
+		" chks:"+checksum+" DST:"+sourceAddress.toString()+" SRC:"+destAddress.toString();
+		return fip;
+	} 
+
+	/**
+	 * Decrementa en 1 el time to live y regenera el checksum
+	 */
+	public void decrementTtl() {
+		if (ttl > 0)
+			ttl--;
+		this.genChecksum();
+	}
+	
+	
+	//**********************************
+	//GETTERS Y SETTERS
+	//**********************************
+	
 	public int getVersion() {
 		return version;
 	}
@@ -375,41 +548,7 @@ public class Datagram {
 		ttl = value;
 		this.genChecksum();
 	}
-
-	public void decrementTtl() {
-		if (ttl > 0)
-			ttl--;
-		this.genChecksum();
-	}
-
-	// Datagram formateado
-	public String toString() {
-
-		String dtrcu= "";
-		if(delay) dtrcu=dtrcu+"D"; else dtrcu=dtrcu+"-";
-		if(throughput) dtrcu=dtrcu+"T"; else dtrcu=dtrcu+"-";
-		if(reliability) dtrcu=dtrcu+"R"; else dtrcu=dtrcu+"-";
-		if(cost) dtrcu=dtrcu+"C"; else dtrcu=dtrcu+"-";
-		if(unused) dtrcu=dtrcu+"U"; else dtrcu=dtrcu+"-";
-		String fff="";
-		if(flags_nousado) fff=fff+"T,"; else fff=fff+"F,";
-		if(flags_ultfrag) fff=fff+"LF,"; else fff=fff+"-,";
-		if(flags_fragm) fff=fff+"DNTF"; else fff=fff+"-";
-		String fip = "DG IP: V:"+version+" HL:"+ihl+" TOS-P:"+precedence+"-"+dtrcu+" TLN:"+totalLength+
-		" DGId:"+datagramId+" Flg:"+fff+" OFF:"+fragOffset+" TTL:"+ttl+" PROT:"+protocol+
-		" chks:"+checksum+" DST:"+sourceAddress.toString()+" SRC:"+destAddress.toString();
-		return fip;
-	} 
-
-	/*
-	 * Es el checksum de la cabecera. Se calcula como el complemento a uno 
-	 * de la suma de los complementos a uno de todas las palabras de 16 bits 
-	 * de la cabecera. Con el fin de este cálculo, el campo checksum se supone cero. 
-	 * Si el checksum de la cabecera no se corresponde con los contenidos, el 
-	 * datagrama se desecha, ya que al menos un bit de la cabecera está corrupto, 
-	 * y el datagrama podría haber llegado al destino equivocado.
-	 */
-
+	
 	public int getPrecedence() {
 		return precedence;
 	}

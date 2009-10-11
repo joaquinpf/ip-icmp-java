@@ -10,6 +10,12 @@ import Utils.BinaryManipulator;
 
 public class FragAssembler {
 
+	/**
+	 * Fragmenta el datagrama pasado como parametro segun el MTU especificado.
+	 * @param datagram
+	 * @param mtu
+	 * @return
+	 */
 	public static List<Datagram> fragmentar(Datagram datagram, int mtu)
 	{
 		List<Datagram> data = new ArrayList<Datagram>(); 
@@ -59,7 +65,16 @@ public class FragAssembler {
 		}	
 	}
 
-
+	/**
+	 * Genera un fragmento del datagrama @param base
+	 * @param base
+	 * @param fragOffsetLocal
+	 * @param fragOffsetGlobal
+	 * @param longFragmento
+	 * @param longHeader
+	 * @param esUltimo
+	 * @return
+	 */
 	private static Datagram generarFramento(Datagram base, int fragOffsetLocal, int fragOffsetGlobal, int longFragmento, int longHeader, boolean esUltimo)
 	{
 		byte[] contenidoFragmento = new byte[longFragmento + longHeader];
@@ -121,6 +136,11 @@ public class FragAssembler {
 		return fragmento;
 	}
 
+	/**
+	 * Reensambla una lista de fragmentos a su estado original.
+	 * @param fragments
+	 * @return
+	 */
 	public static Datagram reensamblar(List<Datagram> fragments)
 	{
 		Collections.sort(fragments, new DatagramComparator());
@@ -198,7 +218,11 @@ public class FragAssembler {
 		return fragmento;
 	}
 
-
+	/**
+	 * Obtiene el tamaño compuesto de los fragmentos pasados por parametro
+	 * @param fragments
+	 * @return
+	 */
 	private static int getDataSize(List<Datagram> fragments) {
 		int size = 0;
 		for(Datagram d: fragments){
@@ -207,6 +231,10 @@ public class FragAssembler {
 		return size;
 	}
 	
+	/**
+	 * Metodo de prueba
+	 * @param args
+	 */	
 	public static void main(String[] args) {
 		/*byte[] message1 = new String("Mensaje de prueba 1. 1 2 3 probando. Necesita ser lo suficientemente largo como para que no entre en el mtu y deba fragmentarlo, idealmente que el ultimo fragmento sea menor que el mtu para ver que sucede. Ya llegamos a la longitud requerida siendo que estamos utilizando MTU 68. End of transmision :D").getBytes();
 		byte[] message2 = new String("Mensaje de prueba 2. 1 2 3 probando. Necesita ser lo suficientemente largo como para que no entre en el mtu y deba fragmentarlo, idealmente que el ultimo fragmento sea menor que el mtu para ver que sucede. Ya llegamos a la longitud requerida siendo que estamos utilizando MTU 68. End of transmision :D").getBytes();
