@@ -1,5 +1,8 @@
 package NetworkProtocols.IP;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Exceptions.DatagramException;
 import NetworkProtocols.IP.Address.IpAddress;
 
@@ -32,10 +35,9 @@ public class Datagram {
 	private byte[] message;		//Bytes del mensaje a ser enviado --200 bytes (longitud para prueba)
 	//OJO!!! no hay nada implementado para tratar estos bytes
 
-	int MTU   ;   // debe ser como minimo 68 bytes (total del header). Longitud en bits. 
 	// Dada la representacion interna del frame IP, devuelve su formato en bits para la transmision
 	public byte[] toByte()  {
-		byte[] b = new byte[20 + message.length];
+		byte[] b = new byte[(ihl * 4) + message.length];
 		b[0] = (byte) ( (version << 4) + ihl);
 		byte x1,x2,x3,x4,x5;
 		x1=x2=x3=x4=x5=0;
@@ -71,7 +73,13 @@ public class Datagram {
 		b[17] = xx[1];
 		b[18] = xx[2];
 		b[19] = xx[3];
-		System.arraycopy(message, 0, b, 20, message.length);
+		if(options != null){
+			System.arraycopy(options, 0, b, 20, options.length);
+		}
+		if(pad != null){
+			System.arraycopy(pad, 0, b, 20 + options.length, pad.length);
+		}
+		System.arraycopy(message, 0, b, (ihl * 4), message.length);
 		return b;
 	}
 
@@ -117,16 +125,47 @@ public class Datagram {
 		checksum = (int) ((byt[10]<<8)&0x00ffff) + (int) (byt[11]&0x00ff);
 		sourceAddress = new IpAddress(byt[12], byt[13], byt[14], byt[15]);
 		destAddress =  new IpAddress(byt[16], byt[17], byt[18], byt[19]);
-		// FALTA la part e de opciones, pad y payloas
-		message = new byte[byt.length - 20];
-		System.arraycopy(byt, 20, message, 0, byt.length - 20);
+		
+		//Options, optional. If ihl * 4 = 20, there are none
+		List<Byte> localOptions = new ArrayList<Byte>();
+		int paddingStart = -1;
+		for(int i=20; i < (ihl * 4); i++){
+			if(byt[i] != 0) {
+				localOptions.add(byt[i]);
+			} else {
+				localOptions.add(byt[i]);
+				paddingStart = i + 1; //padding starts in the next byte
+				break;
+			}
+		}
+		
+		if(localOptions.size() > 0){
+			options = new byte[localOptions.size()];
+			for(int i=0; i < localOptions.size(); i++){
+				options[i] = localOptions.get(i);
+			}
+		} else {
+			options = null;
+		}
+		
+		//Padding, must be used when options ended in a non 4 byte boundary, specified with the option "0000000"
+		if(paddingStart != -1){
+			pad = new byte[4 - localOptions.size() % 4];
+			System.arraycopy(byt, 20 + localOptions.size(), pad, 0, pad.length);
+		} else {
+			pad = null;
+		}
+		
+		// FALTA la parte de payloas
+		message = new byte[byt.length - (ihl * 4)];
+		System.arraycopy(byt, (ihl * 4), message, 0, byt.length - (ihl * 4));
 	}
 
 	// Crea un datagram a partir del valor de sus campos. Produce una inetrrupcion si los valores de
 	// los campos estan fuera de rango (no chequea validez de los campos)
 	public Datagram(int vers, int hedlen, int prec, boolean del, boolean thr, boolean rel, boolean cos,
 			boolean notus, int ttol, int did, boolean fnu, boolean fuf, boolean frg, int off,
-			int tl, int prt, int chk, IpAddress sou, IpAddress des) {
+			int tl, int prt, int chk, IpAddress sou, IpAddress des, byte[] options) {
 		try {
 			if((vers < 0) || (vers > 15)) throw new DatagramException("Campo VERSION fuera de rango");
 			version = vers;
@@ -156,6 +195,17 @@ public class Datagram {
 			checksum = chk;
 			sourceAddress = sou;   // IpAddress, ya chequeada
 			destAddress = des;     // IpAddress, ya chequeada
+			if(options != null) {
+				this.options = options;
+
+				//Padding if options does not end in a 4 byte boundary
+				if(options.length % 4 != 0) {
+					pad = new byte[4 - (options.length % 4)];
+					for(int i=0; i<pad.length ;i++){
+						pad[i] = 7;
+					}
+				}
+			}
 			message = new byte[200];
 		} catch (DatagramException e) {
 			e.printStackTrace();
@@ -163,7 +213,7 @@ public class Datagram {
 	}
 
 	public byte[] getHeaderBytes()  {
-		byte[] b = new byte[100];
+		byte[] b = new byte[(ihl*4) + options.length + pad.length];
 		b[0] = (byte) ( (version << 4) + ihl);
 		byte x1,x2,x3,x4,x5;
 		x1=x2=x3=x4=x5=0;
@@ -199,6 +249,14 @@ public class Datagram {
 		b[17] = xx[1];
 		b[18] = xx[2];
 		b[19] = xx[3];
+		
+		if(options != null){
+			System.arraycopy(options, 0, b, 20, options.length);
+		}
+		if(pad != null){
+			System.arraycopy(pad, 0, b, 20 + options.length, pad.length);
+		}
+		
 		return b;
 	}
 
@@ -416,9 +474,6 @@ public class Datagram {
 		return message;
 	}
 
-	public int getMTU() {
-		return MTU;
-	}
 }
 
 

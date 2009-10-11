@@ -26,6 +26,11 @@ public class FragAssembler {
 				int longitudCabecera = datagram.getTotalLength() - datagram.getMessage().length ;
 				int longitudFragmento = mtu - longitudCabecera;
 
+				//la longitud total debe ser estrictamente multiplo de 8 para poder calcular correctamente el offset
+				if(longitudFragmento % 8 != 0){
+					longitudFragmento -= longitudFragmento % 8;
+				}
+				
 				int totalDatagramas = 0;
 				int fragOffsetGlobal = datagram.getFragOffset();
 				int fragOffsetLocal = 0;
@@ -100,8 +105,15 @@ public class FragAssembler {
 		contenidoFragmento[18] = xx[2];
 		contenidoFragmento[19] = xx[3];
 
+		if(base.getOptions() != null){
+			System.arraycopy(base.getOptions(), 0, contenidoFragmento, 20, base.getOptions().length);
+		}
+		if(base.getPad() != null){
+			System.arraycopy(base.getPad(), 0, contenidoFragmento, 20 + base.getOptions().length, base.getPad().length);
+		}
+		
 		for (int j = 0 ; j < longFragmento; j++) {
-			contenidoFragmento[20+j] = base.getMessage()[fragOffsetLocal+j];
+			contenidoFragmento[longHeader + j] = base.getMessage()[fragOffsetLocal+j];
 		}
 
 		Datagram fragmento = new Datagram(contenidoFragmento);
@@ -113,8 +125,8 @@ public class FragAssembler {
 	{
 		Collections.sort(fragments, new DatagramComparator());
 		int longMessage = getDataSize(fragments);
-		byte[] contenidoFragmento = new byte[longMessage + 20];
 		Datagram base = fragments.get(0);
+		byte[] contenidoFragmento = new byte[longMessage + base.getHeaderLength() * 4];
 		
 		contenidoFragmento[0] = (byte) ( (base.getVersion() << 4) + base.getHeaderLength());
 
@@ -158,11 +170,23 @@ public class FragAssembler {
 		contenidoFragmento[18] = xx[2];
 		contenidoFragmento[19] = xx[3];
 
+		if(base.getOptions() != null){
+			for(int i=20; i<base.getOptions().length; i++){
+				contenidoFragmento[20+i] = base.getOptions()[i];
+			}
+		}
+		
+		if(base.getPad() != null){
+			for(int i=20+base.getOptions().length; i<base.getPad().length; i++){
+				contenidoFragmento[20 + base.getOptions().length + i] = base.getPad()[i];
+			}
+		}
+		
 		int totalcount = 0;
 		for(Datagram d: fragments){
 			int localcount = 0;
 			while(localcount < d.getMessage().length){
-				contenidoFragmento[20+totalcount] = d.getMessage()[localcount];				
+				contenidoFragmento[(base.getHeaderLength() * 4) + totalcount] = d.getMessage()[localcount];				
 				totalcount++;
 				localcount++;
 			}
@@ -224,8 +248,10 @@ public class FragAssembler {
 		}*/
 		
 		byte[] message1 = BinaryManipulator.readByteArray("c:\\CondorMethods.png");
+		byte[] options = new byte[1];
+		options[0] = 0;
 		try {
-			Datagram d1 = new Datagram(4, 5, 0, true, true, true, true, true, message1.length + 20, 1, true, true, true, 0, 128, 1, 11, new IpAddress("168P123P154P111"), new IpAddress("168P123P154P111"));
+			Datagram d1 = new Datagram(4, 6, 0, true, true, true, true, true, message1.length + 24, 1, true, true, true, 0, 128, 1, 11, new IpAddress("168P123P154P111"), new IpAddress("168P123P154P111"),options);
 		
 			d1.setData(message1);
 			
