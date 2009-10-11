@@ -4,6 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
  
+/**
+ * Generador de MD5
+ */
 public class MD5 {
  
 	private static String convertToHex(byte[] data) {

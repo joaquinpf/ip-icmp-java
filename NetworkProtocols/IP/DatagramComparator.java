@@ -4,6 +4,9 @@ import java.util.Comparator;
 
 public class DatagramComparator implements Comparator<Datagram> {
 
+	/**
+	 * Compara datagramas segun su fragment offset
+	 */
 	@Override
 	public int compare(Datagram arg0, Datagram arg1) {
 		
