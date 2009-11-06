@@ -275,7 +275,7 @@ public class FragAssembler {
 			e.printStackTrace();
 		}*/
 		
-		byte[] message1 = BinaryManipulator.readByteArray("c:\\CondorMethods.png");
+		byte[] message1 = BinaryManipulator.readByteArray("c:\\para_elisa.mid");
 		byte[] options = new byte[1];
 		options[0] = 0;
 		try {
