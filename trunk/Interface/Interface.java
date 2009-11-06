@@ -73,6 +73,12 @@ public class Interface {
 		case NetworkProtocols.PROTO_ARP:
 			System.out.println("Protocolo: " + proto);
 			break;
+		case NetworkProtocols.PROTO_ICMP:
+			System.out.println("Protocolo: " + proto);
+			eventoN3 n2 = new eventoN3(eventoN3.INFO_RECEIVED, (Object) rec);
+			((ProtocolInterface) (NetworkProtocols.getProtocol(new Integer(
+					proto)))).addRem(n2);
+			break;
 		default:
 			System.out.println("Protocolo de N3 no reconocido");
 		}

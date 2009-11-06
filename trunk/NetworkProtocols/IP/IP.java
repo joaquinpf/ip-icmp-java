@@ -209,6 +209,11 @@ public class IP implements ProtocolInterface {
 		switch (ici) {
 		case eventoN3.SEND: // Recibe info para enviar
 			// aca se debria ver el nexthop, la interfaz, mtu, fragmentar, etc
+			
+			//VER DE COMPLETAR ESTE SWITCH SEGUN LO QUE CORRESPONDA, PRINCIPALMENTE COMPLETAR
+			//EL ENVIO DE DATOS
+			
+			
 			System.out.println("IP recibe info a enviar");
 			break;
 		default:

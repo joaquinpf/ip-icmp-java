@@ -36,7 +36,7 @@ public class DatagramPool {
 		if(current.isComplete()){
 			Datagram reassembled = current.getReassembled();
 			//PASARLO AL NIVEL SUPERIOR Y REMOVERLO DEL POOL
-			BinaryManipulator.writeByteArray("c:\\CondorMethods-ass.png", reassembled.getMessage());
+			BinaryManipulator.writeByteArray("c:\\para_elisa.mid", reassembled.getMessage());
 			//System.out.println(reassembled);
 			//System.out.println(new String(reassembled.getMessage()));
 			datagrams.remove(md5);
