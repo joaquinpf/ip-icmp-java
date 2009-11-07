@@ -89,6 +89,8 @@ class ICMPMessage implements ICMPInterface {
 			data[6] = (byte) (sequenceNumber >> 8);
 			data[7] = (byte) (sequenceNumber & 0xff);
 		}
+		if (type == 8) //Si es un mensaje de echo request completamos los datos del mensaje
+			System.arraycopy(datosEcho, 0, data, 8, 20);
 		checksum = checksum(data.length);
 		data[2] = (byte) (checksum >> 8);
 		data[3] = (byte) (checksum & 0xff);

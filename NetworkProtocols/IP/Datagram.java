@@ -336,6 +336,49 @@ public class Datagram {
 		}
 	}
 
+	public Datagram (int lengthData){
+//			if((vers < 0) || (vers > 15)) throw new DatagramException("Campo VERSION fuera de rango");
+		version = 4;
+//			if((hedlen < 0) || (hedlen > 15)) throw new DatagramException("Campo HEADERLENGTH fuera de rango");
+		ihl = 20;
+//			if((prec < 0) || (prec > 7)) throw new DatagramException("Campo PRECEDENCE fuera de rango");
+		precedence = 0;
+		delay = false;
+		throughput = false;
+		reliability = false;
+		cost = false;
+		unused = false;
+//			if((ttol < 0) || (ttol > 65535)) throw new DatagramException("Campo TOTALLENGTH fuera de rango");
+		totalLength = 20 + lengthData;
+//			if((did < 0) || (did > 65535)) throw new DatagramException("Campo DATAGRAMID fuera de rango");
+		datagramId = 95;
+		flags_nousado = false;
+		flags_ultfrag = false;
+		flags_fragm = false;
+//			if((off < 0) || (off > 8191)) throw new DatagramException("Campo FRAGMENTOFFSET fuera de rango");
+		fragOffset = 0;
+//			if((tl < 0) || (tl > 255)) throw new DatagramException("Campo TTL fuera de rango");
+		ttl = 64;
+//			if((prt < 0) || (prt > 255)) throw new DatagramException("Campo PROTOCOL fuera de rango");
+		protocol = 1;
+//			if((chk < 0) || (chk > 65535)) throw new DatagramException("Campo CHECKSUM fuera de rango");
+		genChecksum();
+		sourceAddress = null;
+		destAddress = null;
+//			if(options != null) {
+//				this.options = options;
+
+			//Padding if options does not end in a 4 byte boundary
+//				if(options.length % 4 != 0) {
+//					pad = new byte[4 - (options.length % 4)];
+//					for(int i=0; i<pad.length ;i++){
+//						pad[i] = 7;
+//					}
+//				}
+//			}
+		message = new byte[lengthData];
+	}
+	
 	/**
 	 * Retorna los bytes del header del datagrama
 	 * @return
@@ -515,6 +558,13 @@ public class Datagram {
 
 	public void setData(byte[] data){
 		this.message = data.clone();
+		this.genChecksum();
+	}
+	
+	public void setData(byte[] data, boolean updateTotalLength){
+		this.message = data.clone();
+		if (updateTotalLength == true)
+			totalLength = 20 + data.length;
 		this.genChecksum();
 	}
 

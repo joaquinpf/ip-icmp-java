@@ -44,7 +44,8 @@ public class IP implements ProtocolInterface {
 		rdr = new Reader(this);// Instanciacion del thread de lectura de eventos
 		ifaces = ifs;// Interfaces de red del router
 		Nt = nt; // Elementos comunes a los protocolos de nivel de red
-		icmp = new ICMP(this);
+		NetworkProtocols.addProtocol(NetworkProtocols.PROTO_IP, this);
+		icmp = new ICMP();
 	}
 
 	// Metodo invocado por la interfaz para agregar un evento a la cola remota
@@ -212,7 +213,7 @@ public class IP implements ProtocolInterface {
 			
 			//VER DE COMPLETAR ESTE SWITCH SEGUN LO QUE CORRESPONDA, PRINCIPALMENTE COMPLETAR
 			//EL ENVIO DE DATOS
-			
+			//
 			
 			System.out.println("IP recibe info a enviar");
 			break;
