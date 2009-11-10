@@ -1,5 +1,7 @@
 package NetworkProtocols.ICMP;
 
+import java.util.Date;
+
 import Exceptions.*;
 import Interface.*;
 import Utils.*;
@@ -14,6 +16,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 							// o ICMP
 	private IP ip;
 	private Reader rdr;
+	private int msgId = 0;
 	
 //	public ICMP(Interfaces ifs, NetworkProtocols nt) throws NodeException {
 //	}
@@ -46,15 +49,13 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			return false; // El paquete recibido estaba mal formado o no era un
 							// paquete ICMP
 		}
-		System.out.println("ICMP  " + icmpmsg.toString());
+		System.out.println("Se encontro un paquete ICMP proveniente de "
+				+ icmpmsg.getSourceAdrr());
 		switch (icmpmsg.type) {
 			case ICMPMessage.ECHO_REQUEST: {
-				System.out
-						.println("Se encontro un paquete ICMP ECHO REQUEST proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
 				ICMPMessage rp = icmpmsg.reply();
-				System.out.println("REP " + rp.toString());
+				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
 				try {
 					Datagram datagram = new Datagram((byte[]) p.getInfo());
 					datagram.setsourceAddress(datagram.getDestAddress());
@@ -73,120 +74,104 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				break;
 	
 			case ICMPMessage.ECHO_REPLY: {
-				System.out
-						.println("Se encontro un paquete ICMP ECHO REPLY proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
 			}
 				;
 				break;
 	
 			case ICMPMessage.DESTINATION_UNREACHABLE: {
-				System.out
-						.println("Se encontro un paquete ICMP DESTINATION UNREACHABLE proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
 	
 			case ICMPMessage.SOURCE_QUENCH: {
-				System.out
-						.println("Se encontro un paquete ICMP SOURCE QUENCH proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
 	
 			case ICMPMessage.REDIRECT: {
-				System.out
-						.println("Se encontro un paquete ICMP REDIRECT proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
 	
 			case ICMPMessage.ROUTER_ADVERT: {
-				System.out
-						.println("Se encontro un paquete ICMP ROUTER ADVERT proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
 	
 			case ICMPMessage.ROUTER_SOLICIT: {
-				System.out
-						.println("Se encontro un paquete ICMP ROUTER SOLICIT proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
 	
 			case ICMPMessage.TIME_EXCEEDED: {
-				System.out
-						.println("Se encontro un paquete ICMP TIME EXCEEDED proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
 	
 			case ICMPMessage.PARAMETER_PROBLEM: {
-				System.out
-						.println("Se encontro un paquete ICMP PARAMETER PROBLEM proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
 	
 			case ICMPMessage.TIMESTAMP: {
-				System.out
-						.println("Se encontro un paquete ICMP TIMESTAMP proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
+				ICMPMessage rp = icmpmsg.reply();
+				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
+				try {
+					Datagram datagram = new Datagram((byte[]) p.getInfo());
+					datagram.setsourceAddress(datagram.getDestAddress());
+					datagram.setDestAddress(icmpmsg.getSourceAdrr());
+					datagram.setData(rp.toByteArray());
+					// El resto de los campos teoricamente los completa IP antes de
+					// mandar el datagram.
+					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
+					ip.addLoc(evReply);
+				} catch (Exception e) {
+					System.out
+							.println("Error en la generacion y envio de TIMESTAMP REPLY. Posible ruta no encontrada.");
+				}
 			}
 				;
 				break;
 	
 			case ICMPMessage.TIMESTAMP_REPLY: {
-				System.out
-						.println("Se encontro un paquete ICMP TIMESTAMP REPLY proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
 	
 			case ICMPMessage.INFORMATION_REQUEST: {
-				System.out
-						.println("Se encontro un paquete ICMP INFORMATION REQUEST proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
+				ICMPMessage rp = icmpmsg.reply();
+				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
+				try {
+					Datagram datagram = new Datagram((byte[]) p.getInfo());
+					datagram.setsourceAddress(datagram.getDestAddress());
+					datagram.setDestAddress(icmpmsg.getSourceAdrr());
+					datagram.setData(rp.toByteArray());
+					// El resto de los campos teoricamente los completa IP antes de
+					// mandar el datagram.
+					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
+					ip.addLoc(evReply);
+				} catch (Exception e) {
+					System.out
+							.println("Error en la generacion y envio de INFORMATION REPLY. Posible ruta no encontrada.");
+				}
+
 			}
 				;
 				break;
 	
 			case ICMPMessage.INFORMATION_REPLY: {
-				System.out
-						.println("Se encontro un paquete ICMP INFORMATION REPLY proveniente de "
-								+ icmpmsg.getSourceAdrr());
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
-	
 			}
 				;
 				break;
@@ -206,13 +191,9 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		return true; // Se trato el paquete como ICMP
 	}
 
+	// Armar los mensajes dependiendo del Tipo y Codigo
 	public void send(byte type, byte code, IpAddress dest, Datagram data) {
 		ICMPMessage icmpp = new ICMPMessage();
-		icmpp.data = new byte[60]; // Mirar segun tipo y codigo
-		icmpp.type = type;
-		icmpp.code = code;
-
-		// Armar los mensajes dependiendo del Tipo y Codigo
 		switch (type) {
 			/*   El caso del echo reply no se da en el send ya que se envia automaticamente
 			 *   cuando se recibe el echo request
@@ -225,21 +206,41 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			*/
 			case ICMP.DESTINATION_UNREACHABLE: {
 				System.out.println("Envio de mensaje ICMP DESTINATION_UNREACHABLE, tipo " + type + " código " + code);
-				
+				icmpp.data = new byte[36];
+				icmpp.type = type;
+				icmpp.code = code;
+				icmpp.ipHeader = new byte[20];
+				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
+				icmpp.bitsDatosDatagramOriginal = new byte[8];
+				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
 			}
 				;
 				break;
 	
 			case ICMP.SOURCE_QUENCH: {
 				System.out.println("Envio de mensaje ICMP SOURCE_QUENCH, tipo " + type + " código " + code);
-	
+				icmpp.data = new byte[36];
+				icmpp.type = type;
+				icmpp.code = code;
+				icmpp.ipHeader = new byte[20];
+				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
+				icmpp.bitsDatosDatagramOriginal = new byte[8];
+				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
 			}
 				;
 				break;
 	
 			case ICMP.REDIRECT: {
 				System.out.println("Envio de mensaje ICMP REDIRECT, tipo " + type + " código " + code);
-	
+				icmpp.data = new byte[36];
+				icmpp.type = type;
+				icmpp.code = code;
+				icmpp.direccionIpGateway = new byte[4];
+				System.arraycopy(dest.toByte(), 0, icmpp.direccionIpGateway, 0, 4);
+				icmpp.ipHeader = new byte[20];
+				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
+				icmpp.bitsDatosDatagramOriginal = new byte[8];
+				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
 			}
 				;
 				break;
@@ -253,67 +254,139 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMP.ROUTER_ADVERT: {
 				System.out.println("Envio de mensaje ICMP ROUTER_ADVERT, tipo " + type + " código " + code);
-	
+				//Falta implementacion
 			}
 				;
 				break;
 	
 			case ICMP.ROUTER_SOLICIT: {
 				System.out.println("Envio de mensaje ICMP ROUTER_SOLICIT, tipo " + type + " código " + code);
-	
+				//Falta implementacion
 			}
 				;
 				break;
 	
 			case ICMP.TIME_EXCEEDED: {
 				System.out.println("Envio de mensaje ICMP TIME_EXCEEDED, tipo " + type + " código " + code);
-	
+				icmpp.data = new byte[36];
+				icmpp.type = type;
+				icmpp.code = code;
+				icmpp.ipHeader = new byte[20];
+				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
+				icmpp.bitsDatosDatagramOriginal = new byte[8];
+				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
 			}
 				;
 				break;
-	
-			case ICMP.PARAMETER_PROBLEM: {
-				System.out.println("Envio de mensaje ICMP PARAMETER_PROBLEM, tipo " + type + " código " + code);
-	
-			}
-				;
-				break;
-	
+
 			case ICMP.TIMESTAMP: {
 				System.out.println("Envio de mensaje ICMP TIMESTAMP, tipo " + type + " código " + code);
-	
+				icmpp.data = new byte[20];
+				icmpp.type = type;
+				icmpp.code = code;
+				icmpp.identificador = new byte[2];
+				icmpp.nroSecuencia = new byte[2];
+				icmpp.identificador[0] = 0x00;
+				icmpp.identificador[1] = 0x00;
+				icmpp.nroSecuencia[0] = 0x00;
+				icmpp.nroSecuencia[1] = 0x00;
+
+				icmpp.marcaTiempoOrigen = new byte[4];
+				
+				Long m = System.currentTimeMillis();
+				for(int i= 0; i < 4; i++){  
+					icmpp.marcaTiempoOrigen[3 - i] = (byte)(m >>> (i * 8));  
+				}  
+
+				icmpp.marcaTiempoRecepcion = new byte[4];
+				icmpp.marcaTiempoRecepcion[0] = 0x00;
+				icmpp.marcaTiempoRecepcion[1] = 0x00;
+				icmpp.marcaTiempoRecepcion[2] = 0x00;
+				icmpp.marcaTiempoRecepcion[3] = 0x00;
+				icmpp.marcaTiempoTransmision = new byte[4];
+				icmpp.marcaTiempoTransmision[0] = 0x00;
+				icmpp.marcaTiempoTransmision[1] = 0x00;
+				icmpp.marcaTiempoTransmision[2] = 0x00;
+				icmpp.marcaTiempoTransmision[3] = 0x00;
 			}
 				;
 				break;
-	
+				
+			/*Timestamp Reply se genera automaticamente en ICMPMessage cuando se detecta
+			 * Un Timestamp Request	
+			 *
 			case ICMP.TIMESTAMP_REPLY: {
 				System.out.println("Envio de mensaje ICMP TIMESTAMP_REPLY, tipo " + type + " código " + code);
 	
 			}
 				;
 				break;
-	
+			*/
+				
 			case ICMP.INFORMATION_REQUEST: {
 				System.out.println("Envio de mensaje ICMP INFORMATION_REQUEST, tipo " + type + " código " + code);
-	
+				icmpp.data = new byte[8];
+				icmpp.type = type;
+				icmpp.code = code;
+				icmpp.identificador = new byte[2];
+				icmpp.nroSecuencia = new byte[2];
+				icmpp.identificador[0] = 0x00;
+				icmpp.identificador[1] = 0x00;
+				icmpp.nroSecuencia[0] = 0x00;
+				icmpp.nroSecuencia[1] = 0x00;
 			}
 				;
 				break;
 	
+				/*INFORMATION_REPLY se genera automaticamente en ICMPMessage cuando se detecta
+				 * Un INFORMATION Request	
+				 *
 			case ICMP.INFORMATION_REPLY: {
 				System.out.println("Envio de mensaje ICMP INFORMATION_REPLY, tipo " + type + " código " + code);
 	
 			}
 				;
 				break;
-	
+				 */
 			default: {
 				System.out
 						.println("El envio de mensaje ICMP fallo. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
 				return;
 			}
 		}
-		
+		//Enviar el mensaje ya armado
+	}
+
+	/**
+	 * Este send se utiliza solamente para enviar el mensaje de problemas de parametro
+	 * @param type
+	 * @param code
+	 * @param ptr Puntero
+	 * @param data
+	 */
+	public void send(byte type, byte code, byte ptr, Datagram data) {
+		ICMPMessage icmpp = new ICMPMessage();
+		switch (type) {
+			case ICMP.PARAMETER_PROBLEM: {
+				System.out.println("Envio de mensaje ICMP PARAMETER_PROBLEM, tipo " + type + " código " + code);
+				icmpp.data = new byte[36];
+				icmpp.type = type;
+				icmpp.code = code;
+				icmpp.puntero = ptr;
+				icmpp.ipHeader = new byte[20];
+				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
+				icmpp.bitsDatosDatagramOriginal = new byte[8];
+				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
+			}
+				;
+				break;
+			default: {
+				System.out
+						.println("El envio de mensaje ICMP fallo. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
+				return;
+			}
+		}
+		//Enviar el mensaje ya armado
 	}
 
 	public void ping(IpAddress dest) {
@@ -321,11 +394,11 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		icmpmsg.data = new byte[28];
 		icmpmsg.type = (byte) 8;
 		icmpmsg.code = 0;
-		icmpmsg.idMessage = 1000;
+		icmpmsg.idMessage = msgId++;
 		icmpmsg.sequenceNumber = 1;
 		for (int i = 8; i < 20; i++)
-			icmpmsg.datosEcho[i - 8] = (byte)5; //completamos el mensaje con 0101 por cada byte
-		icmpmsg.update();
+			icmpmsg.datosEcho[i - 8] = 0x55; //completamos el mensaje con 01010101 por cada byte
+		//icmpmsg.update();
 		try {
 			// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
 			Datagram datagram = new Datagram(200);
@@ -359,7 +432,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		switch (opcion) {
 		case eventoN3.SEND: // Recibe info para enviar
 			// aca se debria ver el nexthop, la interfaz, mtu, fragmentar, etc
-			System.out.println("ICMP recibe info a enviar");
+			System.out.println("ICMP envía la informacion de la cola");
 			ICMPPacketSend infoSend = (ICMPPacketSend) pack.getInfo();
 			send(infoSend.getType(), infoSend.getCode(), infoSend.getDest(),
 					infoSend.getData());
