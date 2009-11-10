@@ -13,8 +13,23 @@ public class Main {
 	 */
 
 	Datagram d;
+	public static String toByteValueString(byte[] val){
+		String ret = new String();
+		for (int i = 0; i < val.length; i++)
+			ret = ret.concat(String.format("%x", val[i]).toUpperCase());
+		return ret;
+	}
 
 	public static void main(String[] args) {
+		byte b[] = new byte[4];
+		b[0] = 0xf;
+		b[1] = 0xa;
+		b[2] = 0x08;
+		b[3] = 0x00;
+		
+		System.out.println(toByteValueString(b));
+		
+		
 		/*
 		 * ESTA ES UNA SECUENCIA PARECIDA A LA QUE TENDRIA Q HABER
 		 * PARA Q FUNCIONE, AHORA ME ACORDE Q HABIA Q TRATAR CADA NODO
@@ -22,7 +37,7 @@ public class Main {
 		 * ESTA MISMA PERO HAY QUE USAR THREADS Y QUIZAS SE COMPLIQUE UN POCO
 		 * 
 		 */
-		
+		/*
 		Link l1 = null;
 		Link l1r = null;
 		Link l2 = null;
@@ -125,7 +140,7 @@ public class Main {
 		l2.setInterface(ifz1);
 		l2r.setInterface(ifz2);
 		
-		
+		*/
 	}
 
 }
