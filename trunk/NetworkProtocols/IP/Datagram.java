@@ -571,6 +571,10 @@ public class Datagram {
 	public int getProtocol(){
 		return protocol;
 	}
+	
+	public void setProtocol(int p){
+		this.protocol = p;
+	}
 
 	public byte[] getOptions(){
 		return options;

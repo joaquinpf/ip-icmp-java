@@ -1,9 +1,9 @@
 package NetworkProtocols.ICMP;
 
-import java.util.Date;
+//import java.util.Date;
 
 import Exceptions.*;
-import Interface.*;
+//import Interface.*;
 import Utils.*;
 import NetworkProtocols.*;
 import NetworkProtocols.IP.*;
@@ -354,7 +354,15 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				return;
 			}
 		}
-		//Enviar el mensaje ya armado
+		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
+		Datagram datagram = new Datagram(36);
+		datagram.setDestAddress(dest); //Esto fue agregado a IP, ver si iria en otro lado o si lo sacamos del datagram
+		datagram.setsourceAddress(this.ip.getLocalIpAddress());
+		datagram.setProtocol(1);
+		datagram.setData(icmpp.toByteArray(), true);
+		datagram.genChecksum();
+		eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram);
+		ip.addLoc(evReq);
 	}
 
 	/**
@@ -386,7 +394,15 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				return;
 			}
 		}
-		//Enviar el mensaje ya armado
+		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
+		Datagram datagram = new Datagram(36);
+		datagram.setDestAddress(data.getSourceAddress()); //La direccion origen del datagram original es la destino de este
+		datagram.setsourceAddress(this.ip.getLocalIpAddress());
+		datagram.setProtocol(1);
+		datagram.setData(icmpp.toByteArray(), true);
+		datagram.genChecksum();
+		eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram);
+		ip.addLoc(evReq);
 	}
 
 	public void ping(IpAddress dest) {
@@ -401,9 +417,11 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		//icmpmsg.update();
 		try {
 			// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
-			Datagram datagram = new Datagram(200);
+			Datagram datagram = new Datagram(36);
 			datagram.setDestAddress(dest);
 			datagram.setData(icmpmsg.toByteArray(), true);
+			datagram.setsourceAddress(this.ip.getLocalIpAddress());
+			datagram.setProtocol(1);
 			datagram.genChecksum();
 			eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram);
 			ip.addLoc(evReq);
@@ -434,8 +452,12 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			// aca se debria ver el nexthop, la interfaz, mtu, fragmentar, etc
 			System.out.println("ICMP envía la informacion de la cola");
 			ICMPPacketSend infoSend = (ICMPPacketSend) pack.getInfo();
-			send(infoSend.getType(), infoSend.getCode(), infoSend.getDest(),
-					infoSend.getData());
+			if (infoSend.getType() == PARAMETER_PROBLEM)
+				send(infoSend.getType(), infoSend.getCode(), (byte)0x05 /*Valor seteado segun el octeto del problema*/,
+						infoSend.getData());
+			else
+				send(infoSend.getType(), infoSend.getCode(), infoSend.getDest(),
+						infoSend.getData());
 			break;
 		default:
 			System.out
@@ -509,9 +531,5 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				}
 			}
 		}
-
 	}
-
-	
-	
 }

@@ -33,7 +33,8 @@ public class IP implements ProtocolInterface {
 	NetworkProtocols Nt;
 	Reader rdr;// Thread de lectura de events del nivel superior e inferior
 	ICMP icmp;
-
+	IpAddress localAddress = null;
+	
 	public IP(Interfaces ifs, NetworkProtocols nt) throws NodeException {
 		buffRem = new Queue(); // Instanciacion del buffer de recepcion de
 								// eventos remoto
@@ -46,6 +47,16 @@ public class IP implements ProtocolInterface {
 		Nt = nt; // Elementos comunes a los protocolos de nivel de red
 		NetworkProtocols.addProtocol(NetworkProtocols.PROTO_IP, this);
 		icmp = new ICMP();
+	}
+
+	// Establecer direccion local
+	public void setLocalIpAddress(IpAddress loc) {
+		this.localAddress = loc;
+	}
+
+	// Obtener direccion local
+	public IpAddress getLocalIpAddress() {
+		return this.localAddress;
 	}
 
 	// Metodo invocado por la interfaz para agregar un evento a la cola remota
