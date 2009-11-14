@@ -121,4 +121,12 @@ public class Interface {
 	public IpAddress getIPAddress() {
 		return ipAddr;
 	}
+
+	public Integer getMTU() {
+		return MTU;
+	}
+
+	public void setMTU(Integer mTU) {
+		MTU = mTU;
+	}
 }
