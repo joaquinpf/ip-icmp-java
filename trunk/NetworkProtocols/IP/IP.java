@@ -1,5 +1,7 @@
 package NetworkProtocols.IP;
 
+import java.util.List;
+
 import Exceptions.*;
 import Interface.*;
 import Utils.*;
@@ -34,6 +36,7 @@ public class IP implements ProtocolInterface {
 	Reader rdr;// Thread de lectura de events del nivel superior e inferior
 	ICMP icmp;
 	IpAddress localAddress = null;
+	private DatagramPool datagramPool = new DatagramPool();
 	
 	public IP(Interfaces ifs, NetworkProtocols nt) throws NodeException {
 		buffRem = new Queue(); // Instanciacion del buffer de recepcion de
@@ -153,10 +156,13 @@ public class IP implements ProtocolInterface {
 					// reensamblaje de fragmentos superado)
 					// una vez que se tiene el datagram completo, se pasa al
 					// nivel superior
+					
+					Datagram assembled = datagramPool .addDatagram(dd);
+					
 					System.out.println("Envio local para IP: "
 							+ dd.getDestAddress().toString());
 					// local_delivery(dd)
-					if (dd.getProtocol() == 1) { // Si el protocolo es 1
+					if (assembled != null && dd.getProtocol() == 1) { // Si el protocolo es 1
 													// entonces es un paquete
 													// ICMP
 						System.out.println("Recepcion de un mensaje ICMP.");
@@ -169,10 +175,34 @@ public class IP implements ProtocolInterface {
 					// chequea condiciones de error
 					// Mensajes ICMP posibles: Destino inaccesible (Se
 					// necesitaba fragmentacion), Tiempo superado (TTL superado)
-					nxthop = dd.getDestAddress();
-					// remote_delivery(nxthop, re, dd);
-					System.out.println("Envio directo para IP: "
-							+ dd.getDestAddress().toString());
+
+					dd.decrementTtl();
+					if (dd.getTtl() == 0) {
+						System.out
+								.println("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+										+ dd.toString());
+						// Teoricamente este send tendria que ser un
+						// icmp.addLoc(eventoN3);
+						// icmp.send(ICMP.TIME_EXCEEDED,
+						// ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd.getSourceAddr(),
+						// dd);
+						ICMPPacketSend pack = new ICMPPacketSend(
+								ICMP.TIME_EXCEEDED,
+								ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd
+										.getSourceAddress(), dd);
+						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+						return;
+					}
+					
+					List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
+					nxthop = re.getNextHop();
+					
+					for(Datagram fragment: fragments) {
+						re.getInterface().send(NetworkProtocols.PROTO_IP, fragment.toByte());
+
+						System.out.println("Envio directo para IP: "
+								+ fragment.getDestAddress().toString());
+					}
 				}
 			} else {
 				// ruteo indirecto, nexthop el de la entrada de ruteo,
@@ -197,11 +227,18 @@ public class IP implements ProtocolInterface {
 					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
 					return;
 				}
+				
+				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
 				nxthop = re.getNextHop();
-				// remote_delivery(nxthop, re, dd);
-				System.out.println("Envio indirecto para IP: "
-						+ dd.getDestAddress().toString() + " por router "
-						+ nxthop.toString());
+				
+				for(Datagram fragment: fragments) {
+					re.getInterface().send(NetworkProtocols.PROTO_IP, fragment.toByte());
+					
+					System.out.println("Envio indirecto para IP: "
+							+ fragment.getDestAddress().toString() + " por router "
+							+ nxthop.toString());
+				}
+				
 			}
 			break;
 		default:
@@ -217,17 +254,65 @@ public class IP implements ProtocolInterface {
 		// Segun la primitiva recibida, toma la accion que corresponda
 		int ici = idu.getControl();
 		// Ver que es lo que hace esto porq no hace nada...
-		// byte[] bb = (byte[]) idu.getInfo();
+		byte[] datagrambytes = (byte[]) idu.getInfo();
 		switch (ici) {
 		case eventoN3.SEND: // Recibe info para enviar
 			// aca se debria ver el nexthop, la interfaz, mtu, fragmentar, etc
-			
-			//VER DE COMPLETAR ESTE SWITCH SEGUN LO QUE CORRESPONDA, PRINCIPALMENTE COMPLETAR
-			//EL ENVIO DE DATOS
-			//
-			
-			System.out.println("IP recibe info a enviar");
+			Datagram dd = new Datagram(datagrambytes);
+			IpAddress nxthop;
+			RoutingEntry re = rTable.getNextHop(dd.getDestAddress());
+
+			if (re == null) {
+				// Solicitar a ICMP el envio de aviso de error
+				// Teoricamente este send tendria que ser un
+				// icmp.addLoc(eventoN3);
+				// icmp.send(ICMP.DESTINATION_UNREACHABLE,
+				// ICMP.SOURCE_ROUTE_FAILED, dd.getSourceAddr(), dd);
+				ICMPPacketSend pack = new ICMPPacketSend(
+						ICMP.DESTINATION_UNREACHABLE, ICMP.SOURCE_ROUTE_FAILED,
+						dd.getSourceAddress(), dd);
+				icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+				break;
+			}
+			if (re.getType()) {
+				// ruteo directo, puede ser para este equipo o para otro
+
+				// envio al host de destino del datagram, chequea TTL,
+				// fragmenta si es necesario ,
+				// chequea condiciones de error
+				// Mensajes ICMP posibles: Destino inaccesible (Se
+				// necesitaba fragmentacion), Tiempo superado (TTL superado)
+
+				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
+				nxthop = re.getNextHop();
+
+				for(Datagram fragment: fragments) {
+					re.getInterface().send(NetworkProtocols.PROTO_IP, fragment.toByte());
+
+					System.out.println("Envio directo para IP: "
+							+ fragment.getDestAddress().toString());
+				}
+			} else {
+				// ruteo indirecto, nexthop el de la entrada de ruteo,
+				// decrementa TTL, fragmenta si es
+				// necesario chequea condiciones de error
+				// Si al decrementar el TTL este se hace cero se debe solicitar
+				// a ICMP el envio de aviso de error
+
+				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
+				nxthop = re.getNextHop();
+
+				for(Datagram fragment: fragments) {
+					re.getInterface().send(NetworkProtocols.PROTO_IP, fragment.toByte());
+
+					System.out.println("Envio indirecto para IP: "
+							+ fragment.getDestAddress().toString() + " por router "
+							+ nxthop.toString());
+				}
+
+			}
 			break;
+
 		default:
 			break;
 		}
