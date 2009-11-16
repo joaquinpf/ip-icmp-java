@@ -5,6 +5,7 @@ import NetworkProtocols.IP.Address.Mask;
 import Exceptions.AddressException;
 import Exceptions.NodeException;
 import Interface.*;
+import Forms.*;
 
 public class Main {
 
@@ -12,23 +13,11 @@ public class Main {
 	 * @param args
 	 */
 
-	Datagram d;
-	public static String toByteValueString(byte[] val){
-		String ret = new String();
-		for (int i = 0; i < val.length; i++)
-			ret = ret.concat(String.format("%x", val[i]).toUpperCase());
-		return ret;
-	}
-
 	public static void main(String[] args) {
-		byte b[] = new byte[4];
-		b[0] = 0xf;
-		b[1] = 0xa;
-		b[2] = 0x08;
-		b[3] = 0x00;
 		
-		System.out.println(toByteValueString(b));
-		
+		Forms.Principal p = new Principal();
+		p.show();
+			
 		
 		/*
 		 * ESTA ES UNA SECUENCIA PARECIDA A LA QUE TENDRIA Q HABER
@@ -37,7 +26,7 @@ public class Main {
 		 * ESTA MISMA PERO HAY QUE USAR THREADS Y QUIZAS SE COMPLIQUE UN POCO
 		 * 
 		 */
-		/*
+/*
 		Link l1 = null;
 		Link l1r = null;
 		Link l2 = null;
@@ -139,8 +128,7 @@ public class Main {
 		l1r.setInterface(ifz3);
 		l2.setInterface(ifz1);
 		l2r.setInterface(ifz2);
-		
-		*/
+*/
 	}
 
 }
