@@ -16,7 +16,7 @@ public class Linksender extends Thread {
 
 	public Linksender(Link lnk, DatagramSocket sock, InetAddress dip, int dport) {
 		socket = sock;
-		this.link = lnk;
+		link = lnk;
 		remport = dport;
 		remaddr = dip;
 		// TQueue = new Utils.Queue();

@@ -32,13 +32,12 @@ public class IP implements ProtocolInterface {
 							// ICMP
 	public RoutingTable rTable; // Tabla de ruteo del nodo
 	Interfaces ifaces; // Interfaces de red
-	NetworkProtocols Nt;
 	Reader rdr;// Thread de lectura de events del nivel superior e inferior
 	ICMP icmp;
 	IpAddress localAddress = null;
 	private DatagramPool datagramPool = new DatagramPool();
 	
-	public IP(Interfaces ifs, NetworkProtocols nt) throws NodeException {
+	public IP(Interfaces ifs) throws NodeException {
 		buffRem = new Queue(); // Instanciacion del buffer de recepcion de
 								// eventos remoto
 		buffLoc = new Queue(); // Instanciacion del buffer de recepcion de
@@ -47,7 +46,8 @@ public class IP implements ProtocolInterface {
 		rTable = new RoutingTable(); // Instanciacion de la tabla de ruteo
 		rdr = new Reader(this);// Instanciacion del thread de lectura de eventos
 		ifaces = ifs;// Interfaces de red del router
-		Nt = nt; // Elementos comunes a los protocolos de nivel de red
+		@SuppressWarnings("unused")
+		NetworkProtocols Nt = new NetworkProtocols(); // Elementos comunes a los protocolos de nivel de red
 		NetworkProtocols.addProtocol(NetworkProtocols.PROTO_IP, this);
 		icmp = new ICMP();
 	}

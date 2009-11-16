@@ -15,6 +15,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	static Queue buffLoc; // Buffer de entrada local a ICMP, lo llenan las apps
 							// o ICMP
 	private IP ip;
+	@SuppressWarnings("unused")
 	private Reader rdr;
 	private int msgId = 0;
 	
@@ -38,6 +39,8 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		NetworkProtocols.addProtocol(NetworkProtocols.PROTO_ICMP, this);
 		this.ip = (IP) NetworkProtocols.getProtocol(NetworkProtocols.PROTO_IP);
 		this.rdr = new Reader(this);
+		buffRem = new Queue();
+		buffLoc = new Queue();
 	}
 
 	public boolean handle(eventoN3 p) { // Es invocado cuando IP recibe un
@@ -490,9 +493,6 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	}
 	
 	//READER DE LAS COLAS DE PEDIDOS
-	//COMPLETAR BIEN ESTO
-	
-	
 	class Reader extends Thread {
 		ICMP icmp; // Instancia ICMP
 		eventoN3 inforem;// info remota recibida(buffInp), un datagram mas otras
