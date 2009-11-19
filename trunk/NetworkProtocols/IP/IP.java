@@ -81,7 +81,7 @@ public class IP implements ProtocolInterface {
 	// interfaz le informe que
 	// esta caida, etc
 	public void receive_rem(eventoN3 indN2) {
-		System.out.println("Encontro requerimiento en cola remota tipo "
+		System.out.println("Encontro requerimiento en cola remota ip tipo "
 				+ indN2.getControl());
 		// Segun la primitiva recibida, toma la accion que corresponda
 		int ici = indN2.getControl();
@@ -250,17 +250,22 @@ public class IP implements ProtocolInterface {
 	// byte la info de
 	// control de l ainterfa, y un objeto conteniendo la idu
 	public void receive_loc(eventoN3 idu) {
-		System.out.println("Encontro requerimiento en cola local");
+		System.out.println("Encontro requerimiento en cola local ip");
 		// Segun la primitiva recibida, toma la accion que corresponda
 		int ici = idu.getControl();
 		// Ver que es lo que hace esto porq no hace nada...
-		byte[] datagrambytes = (byte[]) idu.getInfo();
+		byte[] datagrambytes;
+		if (idu.getInfo().getClass() == Datagram.class)
+			datagrambytes = ((Datagram) idu.getInfo()).toByte();
+		else
+			datagrambytes = (byte[]) idu.getInfo();
 		switch (ici) {
 		case eventoN3.SEND: // Recibe info para enviar
 			// aca se debria ver el nexthop, la interfaz, mtu, fragmentar, etc
 			Datagram dd = new Datagram(datagrambytes);
 			IpAddress nxthop;
 			RoutingEntry re = rTable.getNextHop(dd.getDestAddress());
+			System.out.println("Requerimiento local destino a " + dd.getDestAddress().toString());
 
 			if (re == null) {
 				// Solicitar a ICMP el envio de aviso de error
@@ -268,10 +273,18 @@ public class IP implements ProtocolInterface {
 				// icmp.addLoc(eventoN3);
 				// icmp.send(ICMP.DESTINATION_UNREACHABLE,
 				// ICMP.SOURCE_ROUTE_FAILED, dd.getSourceAddr(), dd);
-				ICMPPacketSend pack = new ICMPPacketSend(
-						ICMP.DESTINATION_UNREACHABLE, ICMP.SOURCE_ROUTE_FAILED,
-						dd.getSourceAddress(), dd);
-				icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+				if (!dd.getSourceAddress().toString().equals(this.localAddress.toString())){
+					ICMPPacketSend pack = new ICMPPacketSend(
+							ICMP.DESTINATION_UNREACHABLE, ICMP.SOURCE_ROUTE_FAILED,
+							dd.getSourceAddress(), dd);
+					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+				}
+				else{
+					String msg = new String("Type: " + ICMP.DESTINATION_UNREACHABLE + " ");
+					msg = msg.concat("DESTINATION_UNREACHABLE");
+					msg = msg.concat("  -  Codigo: " + ICMP.SOURCE_ROUTE_FAILED);
+					System.out.println(msg);
+				}
 				break;
 			}
 			if (re.getType()) {
@@ -317,6 +330,12 @@ public class IP implements ProtocolInterface {
 			break;
 		}
 	}
+
+	public ICMP getICMPProtocol(){
+		return icmp;
+	}
+	
+
 
 	// Agregado de una entrada a la tabla de ruteo. Este metodo se invocaria
 	// cuando se coloca el
@@ -387,7 +406,7 @@ public class IP implements ProtocolInterface {
 				}
 			}
 		}
-
+		
 		// Muestar variables
 		public void show() {
 			//

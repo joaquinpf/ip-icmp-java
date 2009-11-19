@@ -3,6 +3,7 @@ package NetworkProtocols.IP;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exceptions.AddressException;
 import Exceptions.DatagramException;
 import NetworkProtocols.IP.Address.IpAddress;
 
@@ -189,7 +190,7 @@ public class Datagram {
 	public Datagram(byte[] byt) {
 		version=(int)(byt[0]&0xf0);
 		version = version >> 4;
-		ihl = (int)(byt[0]&0x0f);
+		ihl = (int)(byt[0]&0x14);
 		//    int b = (int) byt[0];
 		precedence = byt[1] % 0x000000e0;  // Precedencia, 3 bits
 		precedence = (precedence >> 5) & 0x07;
@@ -362,21 +363,20 @@ public class Datagram {
 //			if((prt < 0) || (prt > 255)) throw new DatagramException("Campo PROTOCOL fuera de rango");
 		protocol = 1;
 //			if((chk < 0) || (chk > 65535)) throw new DatagramException("Campo CHECKSUM fuera de rango");
-		genChecksum();
-		sourceAddress = null;
-		destAddress = null;
-//			if(options != null) {
-//				this.options = options;
-
-			//Padding if options does not end in a 4 byte boundary
-//				if(options.length % 4 != 0) {
-//					pad = new byte[4 - (options.length % 4)];
-//					for(int i=0; i<pad.length ;i++){
-//						pad[i] = 7;
-//					}
-//				}
-//			}
 		message = new byte[lengthData];
+		try {
+			sourceAddress = new IpAddress("192P168P1P1");
+		} catch (AddressException e) {
+			System.out.println("Error al crear la direccion de origen del datagram");
+			e.printStackTrace();
+		}
+		try {
+			destAddress = new IpAddress("192P168P1P1");
+		} catch (AddressException e) {
+			System.out.println("Error al crear la direccion de destino del datagram");
+			e.printStackTrace();
+		}
+		genChecksum();
 	}
 	
 	/**
@@ -384,7 +384,13 @@ public class Datagram {
 	 * @return
 	 */
 	public byte[] getHeaderBytes()  {
-		byte[] b = new byte[(ihl*4) + options.length + pad.length];
+		int options_len = 0, pad_len = 0;
+		if (options != null)
+			options_len = options.length;
+		if (pad != null)
+			pad_len = pad.length;
+		
+		byte[] b = new byte[(ihl*4) + options_len + pad_len];
 		b[0] = (byte) ( (version << 4) + ihl);
 		byte x1,x2,x3,x4,x5;
 		x1=x2=x3=x4=x5=0;
@@ -442,7 +448,7 @@ public class Datagram {
 		int ck = 0;
 		for(int i=0; i<lg;i=i+2) 
 			ck+=(((b[i] & 0xff) << 8) | (b[i+1] & 0xff));
-		System.out.println("ck "+ck +"   and "+ (int) (ck&0x00ffff));
+		//System.out.println("ck "+ck +"   and "+ (int) (ck&0x00ffff));
 		if( (ck & 0x00ffff) == 0x00ffff) 
 			return true;
 		else 
@@ -460,10 +466,10 @@ public class Datagram {
 		b[10] = b[11] = 0;      // pone checksum en cero
 		int ck = 0;
 		for(int i=0; i<lg;i=i+2) ck+=(((b[i] & 0xff) << 8) | (b[i+1] & 0xff));
-		System.out.println("checksum "+ck );
+		//System.out.println("checksum "+ck );
 		ck = (ck^0x00ffff)&0x00ffff;
 		this.checksum = ck;                 // cambia el checksum en el datagram
-		System.out.println("checksum "+ck );
+		//System.out.println("checksum "+ck );
 		return ck;
 	}
 
@@ -476,9 +482,9 @@ public class Datagram {
 		int lg = b.length;
 		int ck = 0;
 		for(int i=0; i<lg;i=i+2) ck+=(((b[i] & 0xff) << 8) | (b[i+1] & 0xff));
-		System.out.println("checksum SUMA "+ck );
+		//System.out.println("checksum SUMA "+ck );
 		ck = (ck^0x00ffff)&0x00ffff;
-		System.out.println("checksum RESULTADO "+ck );
+		//System.out.println("checksum RESULTADO "+ck );
 		return ck;
 	}
 
