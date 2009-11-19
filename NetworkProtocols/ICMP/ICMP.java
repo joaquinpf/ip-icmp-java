@@ -208,7 +208,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				break;
 			*/
 			case ICMP.DESTINATION_UNREACHABLE: {
-				System.out.println("Envio de mensaje ICMP DESTINATION_UNREACHABLE, tipo " + type + " código " + code);
+				System.out.println("Envio de mensaje ICMP DESTINATION_UNREACHABLE, tipo " + type + " código " + code + " direccion " + dest.toString());
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
@@ -249,7 +249,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				break;
 	
 			case ICMP.ECHO_REQUEST: {
-				System.out.println("Envio de mensaje ICMP ECHO_REQUEST, tipo " + type + " código " + code);
+				System.out.println("Envio de mensaje ICMP ECHO_REQUEST, tipo " + type + " código " + code + " direccion destino " + dest.toString());
 				ping(dest);
 			}
 				;
@@ -358,14 +358,16 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			}
 		}
 		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
-		Datagram datagram = new Datagram(36);
-		datagram.setDestAddress(dest); //Esto fue agregado a IP, ver si iria en otro lado o si lo sacamos del datagram
-		datagram.setsourceAddress(this.ip.getLocalIpAddress());
-		datagram.setProtocol(1);
-		datagram.setData(icmpp.toByteArray(), true);
-		datagram.genChecksum();
-		eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram);
-		ip.addLoc(evReq);
+		if (type != ICMP.ECHO_REQUEST) {
+			Datagram datagram = new Datagram(36);
+			datagram.setDestAddress(dest); //Esto fue agregado a IP, ver si iria en otro lado o si lo sacamos del datagram
+			datagram.setsourceAddress(this.ip.getLocalIpAddress());
+			datagram.setProtocol(1);
+			datagram.setData(icmpp.toByteArray(), true);
+			datagram.genChecksum();
+			eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram);
+			ip.addLoc(evReq);
+		}
 	}
 
 	/**
@@ -415,6 +417,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		icmpmsg.code = 0;
 		icmpmsg.idMessage = msgId++;
 		icmpmsg.sequenceNumber = 1;
+		icmpmsg.datosEcho = new byte[20];
 		for (int i = 8; i < 20; i++)
 			icmpmsg.datosEcho[i - 8] = 0x55; //completamos el mensaje con 01010101 por cada byte
 		//icmpmsg.update();
@@ -426,7 +429,10 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			datagram.setsourceAddress(this.ip.getLocalIpAddress());
 			datagram.setProtocol(1);
 			datagram.genChecksum();
-			eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram);
+			System.out
+			.println("Ping a " + dest.toString());
+			
+			eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram.toByte());
 			ip.addLoc(evReq);
 		} catch (Exception e) {
 			System.out

@@ -30,7 +30,9 @@ public class RoutingEntry {
 	// default)
 	public int getmatching(IpAddress dest) {
 		int mat = -1;
-		if ((dest.toInt() & mask.toInt()) == Destination.toInt())
+		// Hay problemas en la linea de abajo con el tema de la mascara, ver q es lo q hicieron!!
+//		if ((dest.toInt() & mask.toInt()) == Destination.toInt())
+		if (dest.toInt() == Destination.toInt())
 			mat = mask.toPrefix();
 		return mat;
 	}

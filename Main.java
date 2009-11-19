@@ -1,10 +1,4 @@
-import Link.Link;
-import NetworkProtocols.IP.*;
-import NetworkProtocols.IP.Address.IpAddress;
-import NetworkProtocols.IP.Address.Mask;
-import Exceptions.AddressException;
-import Exceptions.NodeException;
-import Interface.*;
+
 import Forms.*;
 
 public class Main {
@@ -15,8 +9,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		
-		Forms.Principal p = new Principal();
-		p.show();
+		Forms.Configuracion c = new Configuracion();
+		c.setVisible(true);
 			
 		
 		/*
