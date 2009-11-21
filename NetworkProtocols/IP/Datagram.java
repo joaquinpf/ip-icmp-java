@@ -188,9 +188,9 @@ public class Datagram {
 	 * @param byt
 	 */
 	public Datagram(byte[] byt) {
-		version=(int)(byt[0]&0xf0);
+		version=(int)(byt[0] & 0xf0);
 		version = version >> 4;
-		ihl = (int)(byt[0]&0x14);
+		ihl = (int)(byt[0] & 0x0F);
 		//    int b = (int) byt[0];
 		precedence = byt[1] % 0x000000e0;  // Precedencia, 3 bits
 		precedence = (precedence >> 5) & 0x07;
@@ -341,7 +341,7 @@ public class Datagram {
 //			if((vers < 0) || (vers > 15)) throw new DatagramException("Campo VERSION fuera de rango");
 		version = 4;
 //			if((hedlen < 0) || (hedlen > 15)) throw new DatagramException("Campo HEADERLENGTH fuera de rango");
-		ihl = 20;
+		ihl = 5;
 //			if((prec < 0) || (prec > 7)) throw new DatagramException("Campo PRECEDENCE fuera de rango");
 		precedence = 0;
 		delay = false;
@@ -570,7 +570,7 @@ public class Datagram {
 	public void setData(byte[] data, boolean updateTotalLength){
 		this.message = data.clone();
 		if (updateTotalLength == true)
-			totalLength = 20 + data.length;
+			totalLength = getHeaderLength() * 4 + data.length;
 		this.genChecksum();
 	}
 

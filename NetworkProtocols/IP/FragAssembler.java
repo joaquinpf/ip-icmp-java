@@ -276,13 +276,18 @@ public class FragAssembler {
 			e.printStackTrace();
 		}*/
 		
-		byte[] message1 = BinaryManipulator.readByteArray("c:\\para_elisa.mid");
+		byte[] message1 = BinaryManipulator.readByteArray("c:\\Output.benchmark - Copy.txt");
 		byte[] options = new byte[1];
 		options[0] = 0;
 		try {
 			Datagram d1 = new Datagram(4, 6, 0, true, true, true, true, true, message1.length + 24, 1, true, true, true, 0, 128, 1, 11, new IpAddress("168P123P154P111"), new IpAddress("168P123P154P111"),options);
-		
-			d1.setData(message1);
+			d1.genChecksum();
+			Datagram d2 = new Datagram(d1.toByte());
+			d2.genChecksum();
+			d2.verifyChecksum();
+			d1.setData(message1,true);
+			d1.verifyChecksum();
+			
 			
 			List<Datagram> frags = new ArrayList<Datagram>();
 			frags.addAll(FragAssembler.fragmentar(d1, 700));

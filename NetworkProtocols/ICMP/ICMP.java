@@ -212,7 +212,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
-				icmpp.ipHeader = new byte[20];
+				icmpp.ipHeader = new byte[data.getHeaderLength() * 4];
 				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
 				icmpp.bitsDatosDatagramOriginal = new byte[8];
 				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
@@ -225,7 +225,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
-				icmpp.ipHeader = new byte[20];
+				icmpp.ipHeader = new byte[data.getHeaderLength() * 4];
 				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
 				icmpp.bitsDatosDatagramOriginal = new byte[8];
 				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
@@ -240,7 +240,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				icmpp.code = code;
 				icmpp.direccionIpGateway = new byte[4];
 				System.arraycopy(dest.toByte(), 0, icmpp.direccionIpGateway, 0, 4);
-				icmpp.ipHeader = new byte[20];
+				icmpp.ipHeader = new byte[data.getHeaderLength() * 4];
 				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
 				icmpp.bitsDatosDatagramOriginal = new byte[8];
 				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
@@ -274,7 +274,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
-				icmpp.ipHeader = new byte[20];
+				icmpp.ipHeader = new byte[data.getHeaderLength() * 4];
 				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
 				icmpp.bitsDatosDatagramOriginal = new byte[8];
 				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
@@ -359,11 +359,13 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		}
 		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
 		if (type != ICMP.ECHO_REQUEST) {
-			Datagram datagram = new Datagram(36);
-			datagram.setDestAddress(dest); //Esto fue agregado a IP, ver si iria en otro lado o si lo sacamos del datagram
-			datagram.setsourceAddress(this.ip.getLocalIpAddress());
-			datagram.setProtocol(1);
-			datagram.setData(icmpp.toByteArray(), true);
+			
+			Datagram datagram = new Datagram(data.getVersion(), data.getHeaderLength(), data.getPrecedence(), data.isDelay(), data.isThroughput(), 
+					data.isReliability(), data.isCost(), data.isFlags_nousado(), data.getTotalLength(), data.getDatagramId(), data.isFlags_nousado(), 
+					data.isFlags_ultfrag(), data.isFlags_fragm(), data.getFragOffset(), data.getTtl(), 1, data.getChecksum(), 
+					this.ip.getLocalIpAddress(), dest, data.getOptions());
+
+			datagram.setData(icmpp.toByteArray(),true);
 			datagram.genChecksum();
 			eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram);
 			ip.addLoc(evReq);
@@ -386,7 +388,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				icmpp.type = type;
 				icmpp.code = code;
 				icmpp.puntero = ptr;
-				icmpp.ipHeader = new byte[20];
+				icmpp.ipHeader = new byte[data.getHeaderLength() * 4];
 				System.arraycopy(data.getHeaderBytes(), 0, icmpp.ipHeader, 0, 20);
 				icmpp.bitsDatosDatagramOriginal = new byte[8];
 				System.arraycopy(data.getData(), 0, icmpp.bitsDatosDatagramOriginal, 0, 8);
