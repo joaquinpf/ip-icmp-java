@@ -26,7 +26,7 @@ import NetworkProtocols.IP.Address.Mask;
  *
  * @author Administrator
  */
-public class Configuracion extends javax.swing.JFrame {
+public class Configuracion2 extends javax.swing.JFrame {
 	private static final long serialVersionUID = 4090957822834807053L;
 	private static IpAddress addr1 = null;
 	private static IpAddress addrDst = null;
@@ -35,7 +35,7 @@ public class Configuracion extends javax.swing.JFrame {
 	private static IP ipProtocol = null;
 
     /** Creates new form Configuracion */
-    public Configuracion() {
+    public Configuracion2() {
         initComponents();
 		try {
 			mask = new Mask(24);
@@ -192,7 +192,7 @@ public class Configuracion extends javax.swing.JFrame {
 		}
 		ipProtocol.setLocalIpAddress(addr1);
 		cmdGuardar.setEnabled(false);
-		Principal p = new Principal(this);
+		Principal2 p = new Principal2();//new Principal(this);
 		p.setVisible(true);
 		this.setVisible(false);
 	}//GEN-LAST:event_cmdGuardarActionPerformed

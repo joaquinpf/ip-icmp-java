@@ -61,7 +61,8 @@ public class FragAssembler {
 		}	
 		else 
 		{
-			return null;
+			data.add(datagram);
+			return data;
 		}	
 	}
 

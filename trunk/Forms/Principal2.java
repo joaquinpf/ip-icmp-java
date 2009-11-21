@@ -15,11 +15,11 @@ package Forms;
  *
  * @author Administrator
  */
-public class Principal extends javax.swing.JFrame {
+public class Principal2 extends javax.swing.JFrame {
 
     private Configuracion conf = new Configuracion();
     /** Creates new form Principal */
-    public Principal() {
+    public Principal2() {
         initComponents();
     }
 
@@ -309,7 +309,7 @@ public class Principal extends javax.swing.JFrame {
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Principal().setVisible(true);
+                new Principal2().setVisible(true);
             }
         });
     }

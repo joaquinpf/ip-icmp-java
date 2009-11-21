@@ -193,6 +193,17 @@ public class IP implements ProtocolInterface {
 						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
 						return;
 					}
+
+					//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
+					if (dd.getTotalLength() > re.getInterface().getMTU() && dd.isFlags_fragm() == false){
+						System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+								+ dd.toString());
+						ICMPPacketSend pack = new ICMPPacketSend(
+								ICMP.FRAGMENTATION_NEEDED_DF_1, ICMP.FRAGMENTATION_NEEDED_DF_1,
+								dd.getSourceAddress(), dd);
+						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+						return;
+					}
 					
 					List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
 					nxthop = re.getNextHop();
@@ -224,6 +235,17 @@ public class IP implements ProtocolInterface {
 							ICMP.TIME_EXCEEDED,
 							ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd
 									.getSourceAddress(), dd);
+					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+					return;
+				}
+
+				//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
+				if (dd.getTotalLength() > re.getInterface().getMTU() && dd.isFlags_fragm() == false){
+					System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+							+ dd.toString());
+					ICMPPacketSend pack = new ICMPPacketSend(
+							ICMP.FRAGMENTATION_NEEDED_DF_1, ICMP.FRAGMENTATION_NEEDED_DF_1,
+							dd.getSourceAddress(), dd);
 					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
 					return;
 				}
@@ -296,9 +318,21 @@ public class IP implements ProtocolInterface {
 				// Mensajes ICMP posibles: Destino inaccesible (Se
 				// necesitaba fragmentacion), Tiempo superado (TTL superado)
 
-				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
-				nxthop = re.getNextHop();
+				//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
+				if (dd.getTotalLength() > re.getInterface().getMTU() && dd.isFlags_fragm() == false){
+					System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+							+ dd.toString());
+					ICMPPacketSend pack = new ICMPPacketSend(
+							ICMP.FRAGMENTATION_NEEDED_DF_1, ICMP.FRAGMENTATION_NEEDED_DF_1,
+							dd.getSourceAddress(), dd);
+					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+					return;
+				}
 
+				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
+				
+				nxthop = re.getNextHop();
+				
 				for(Datagram fragment: fragments) {
 					re.getInterface().send(NetworkProtocols.PROTO_IP, fragment.toByte());
 
@@ -312,6 +346,18 @@ public class IP implements ProtocolInterface {
 				// Si al decrementar el TTL este se hace cero se debe solicitar
 				// a ICMP el envio de aviso de error
 
+
+				//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
+				if (dd.getTotalLength() > re.getInterface().getMTU() && dd.isFlags_fragm() == false){
+					System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+							+ dd.toString());
+					ICMPPacketSend pack = new ICMPPacketSend(
+							ICMP.FRAGMENTATION_NEEDED_DF_1, ICMP.FRAGMENTATION_NEEDED_DF_1,
+							dd.getSourceAddress(), dd);
+					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+					return;
+				}
+				
 				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
 				nxthop = re.getNextHop();
 
