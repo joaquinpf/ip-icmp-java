@@ -121,6 +121,36 @@ public class IP implements ProtocolInterface {
 				if (proc_opts(dd) == false)
 					break;
 			}
+			
+			
+			if (this.localAddress.equals(dd.getDestAddress())) {
+				// envío local, detiene el datagram hasta recibir todos los
+				// fragmentos (si es fragmento)
+				// Mensajes ICMP posibles: Tiempo superado (Tiempo de
+				// reensamblaje de fragmentos superado)
+				// una vez que se tiene el datagram completo, se pasa al
+				// nivel superior
+				
+				Datagram assembled = datagramPool .addDatagram(dd);
+				
+				System.out.println("Envio local para IP: "
+						+ dd.getDestAddress().toString());
+				// local_delivery(dd)
+				System.out.println("assembled: "
+						+ assembled);
+				System.out.println("dd.getProtocol(): "
+						+ dd.getProtocol());
+				if (assembled != null && dd.getProtocol() == 1) { // Si el protocolo es 1
+												// entonces es un paquete
+												// ICMP
+					System.out.println("Recepcion de un mensaje ICMP.");
+					icmp.addRem(indN2); // .handle(indN2);
+					return;
+				}
+				break;
+			}
+			
+			
 			// Proceso del datagram
 			// 1- Si no hay entrada en la tabla de ruteo, generar error (ICMP al
 			// origen)
