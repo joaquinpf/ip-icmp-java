@@ -354,8 +354,8 @@ public class Datagram {
 //			if((did < 0) || (did > 65535)) throw new DatagramException("Campo DATAGRAMID fuera de rango");
 		datagramId = 95;
 		flags_nousado = false;
-		flags_ultfrag = false;
-		flags_fragm = false;
+		flags_ultfrag = true;
+		flags_fragm = true;
 //			if((off < 0) || (off > 8191)) throw new DatagramException("Campo FRAGMENTOFFSET fuera de rango");
 		fragOffset = 0;
 //			if((tl < 0) || (tl > 255)) throw new DatagramException("Campo TTL fuera de rango");
@@ -671,6 +671,14 @@ public class Datagram {
 
 	public byte[] getMessage() {
 		return message;
+	}
+	
+	public void setUltimoFragmento(boolean status){
+		flags_ultfrag = status;
+	}
+
+	public void setFragmentar(boolean status){
+		flags_fragm = status;
 	}
 
 }

@@ -24,8 +24,8 @@ class ICMPMessage implements ICMPInterface {
 
 	// Datos especificos del mensaje ICMP
 	byte[] ipHeader; // 20 bytes
-//	byte[] postHeader; // 4 bytes     son todos ceros
-//	byte[] postHeader3; // 3 bytes    son todos ceros
+	byte[] postHeader; // 4 bytes     son todos ceros
+	byte[] postHeader3; // 3 bytes    son todos ceros
 	byte puntero; // 1 byte
 	byte[] bitsDatosDatagramOriginal; // 8 bytes
 	byte[] identificador; // 2 bytes
@@ -35,7 +35,9 @@ class ICMPMessage implements ICMPInterface {
 	byte[] marcaTiempoTransmision; // 4 bytes
 	byte[] direccionIpGateway; // 4 bytes
 	byte[] datosEcho; // 20 bytes
-
+	
+	IpAddress src = null;
+	
 	public ICMPMessage() {
 		data = null;
 	}
@@ -46,39 +48,258 @@ class ICMPMessage implements ICMPInterface {
 	}
 
 	public ICMPMessage(eventoN3 p) throws MalformedPacketException {
-		Datagram datagram = new Datagram((byte[]) p.getInfo());
+		Datagram datagram;
+		if (p.getInfo().getClass().equals(Datagram.class))
+			datagram = (Datagram) p.getInfo();
+		else
+			datagram = new Datagram((byte[]) p.getInfo());
 		data = datagram.getData();
 		parse();
 	}
 
 	private void parse() throws MalformedPacketException {
+		//if (validChecksum() == false)
+		//	throw new MalformedPacketException();
 		DataInputStream ds = new DataInputStream(new ByteArrayInputStream(data,
-				0, 8));
+				0, 4));
 		try {
 			type = (byte) ds.readUnsignedByte();
 			code = (byte) ds.readUnsignedByte();
 			checksum = ds.readUnsignedShort();
-			if ((type == ECHO_REQUEST) || (type == ECHO_REPLY)) {
-				idMessage = ds.readUnsignedShort();
-				sequenceNumber = ds.readUnsignedShort();
+			
+			//Aca hay que crear el mensaje segun el tipo y codigo recibido
+			switch (type) {
+				case ECHO_REQUEST:
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 28));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					idMessage = ds.readUnsignedShort();
+					sequenceNumber = ds.readUnsignedShort();
+					datosEcho = new byte[20];
+					for (int i = 0; i < 20; i++)
+						datosEcho[i] = (byte)ds.readUnsignedByte();
+					break;
+				case ECHO_REPLY:
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 28));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					idMessage = ds.readUnsignedShort();
+					sequenceNumber = ds.readUnsignedShort();
+					datosEcho = new byte[20];
+					for (int i = 0; i < 20; i++)
+						datosEcho[i] = (byte)ds.readUnsignedByte();
+					break;
+				case ICMP.DESTINATION_UNREACHABLE: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 36));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					postHeader = new byte[4];
+					for (int i = 0; i < 4; i++)
+						postHeader[i] = (byte)ds.readUnsignedByte();
+					ipHeader = new byte[20];
+					for (int i = 0; i < 20; i++)
+						ipHeader[i] = (byte)ds.readUnsignedByte();
+					bitsDatosDatagramOriginal = new byte[8];
+					for (int i = 0; i < 8; i++)
+						bitsDatosDatagramOriginal[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.SOURCE_QUENCH: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 36));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					postHeader = new byte[4];
+					for (int i = 0; i < 4; i++)
+						postHeader[i] = (byte)ds.readUnsignedByte();
+					ipHeader = new byte[20];
+					for (int i = 0; i < 20; i++)
+						ipHeader[i] = (byte)ds.readUnsignedByte();
+					bitsDatosDatagramOriginal = new byte[8];
+					for (int i = 0; i < 8; i++)
+						bitsDatosDatagramOriginal[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.REDIRECT: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 36));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					direccionIpGateway = new byte[4];
+					for (int i = 0; i < 4; i++)
+						direccionIpGateway[i] = (byte)ds.readUnsignedByte();
+					ipHeader = new byte[20];
+					for (int i = 0; i < 20; i++)
+						ipHeader[i] = (byte)ds.readUnsignedByte();
+					bitsDatosDatagramOriginal = new byte[8];
+					for (int i = 0; i < 8; i++)
+						bitsDatosDatagramOriginal[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.ROUTER_ADVERT: {
+					
+					
+					//Mirar porq falta el detalle del mensaje
+				}
+					;
+					break;
+		
+				case ICMP.ROUTER_SOLICIT: {
+					
+					
+					//Mirar porq falta el detalle del mensaje
+				}
+					;
+					break;
+		
+				case ICMP.TIME_EXCEEDED: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 36));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					postHeader = new byte[4];
+					for (int i = 0; i < 4; i++)
+						postHeader[i] = (byte)ds.readUnsignedByte();
+					ipHeader = new byte[20];
+					for (int i = 0; i < 20; i++)
+						ipHeader[i] = (byte)ds.readUnsignedByte();
+					bitsDatosDatagramOriginal = new byte[8];
+					for (int i = 0; i < 8; i++)
+						bitsDatosDatagramOriginal[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.PARAMETER_PROBLEM: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 36));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					puntero = (byte)ds.readUnsignedByte();
+					postHeader3 = new byte[4];
+					for (int i = 0; i < 4; i++)
+						postHeader3[i] = (byte)ds.readUnsignedByte();
+					ipHeader = new byte[20];
+					for (int i = 0; i < 20; i++)
+						ipHeader[i] = (byte)ds.readUnsignedByte();
+					bitsDatosDatagramOriginal = new byte[8];
+					for (int i = 0; i < 8; i++)
+						bitsDatosDatagramOriginal[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.TIMESTAMP: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 20));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					identificador = new byte[2];
+					for (int i = 0; i < 2; i++)
+						identificador[i] = (byte)ds.readUnsignedByte();
+					nroSecuencia = new byte[2];
+					for (int i = 0; i < 2; i++)
+						nroSecuencia[i] = (byte)ds.readUnsignedByte();
+					marcaTiempoOrigen = new byte[4];
+					for (int i = 0; i < 4; i++)
+						marcaTiempoOrigen[i] = (byte)ds.readUnsignedByte();
+					marcaTiempoRecepcion = new byte[4];
+					for (int i = 0; i < 4; i++)
+						marcaTiempoRecepcion[i] = (byte)ds.readUnsignedByte();
+					marcaTiempoTransmision = new byte[4];
+					for (int i = 0; i < 4; i++)
+						marcaTiempoTransmision[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.TIMESTAMP_REPLY: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 20));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					identificador = new byte[2];
+					for (int i = 0; i < 2; i++)
+						identificador[i] = (byte)ds.readUnsignedByte();
+					nroSecuencia = new byte[2];
+					for (int i = 0; i < 2; i++)
+						nroSecuencia[i] = (byte)ds.readUnsignedByte();
+					marcaTiempoOrigen = new byte[4];
+					for (int i = 0; i < 4; i++)
+						marcaTiempoOrigen[i] = (byte)ds.readUnsignedByte();
+					marcaTiempoRecepcion = new byte[4];
+					for (int i = 0; i < 4; i++)
+						marcaTiempoRecepcion[i] = (byte)ds.readUnsignedByte();
+					marcaTiempoTransmision = new byte[4];
+					for (int i = 0; i < 4; i++)
+						marcaTiempoTransmision[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.INFORMATION_REQUEST: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 8));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					identificador = new byte[2];
+					for (int i = 0; i < 2; i++)
+						identificador[i] = (byte)ds.readUnsignedByte();
+					nroSecuencia = new byte[2];
+					for (int i = 0; i < 2; i++)
+						nroSecuencia[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.INFORMATION_REPLY: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 8));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					identificador = new byte[2];
+					for (int i = 0; i < 2; i++)
+						identificador[i] = (byte)ds.readUnsignedByte();
+					nroSecuencia = new byte[2];
+					for (int i = 0; i < 2; i++)
+						nroSecuencia[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+		
+				default: {
+					System.out
+							.println("No se pudo crear el mensaje. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
+					return;
+				}
 			}
+			this.update();
 		} catch (EOFException e) {
 		} catch (IOException e) {
 		}
-		if (checksum(data.length) != 0)
-			throw new MalformedPacketException();
 	}
 
 	public byte[] toByteArray() {
 		this.update();
 		return data.clone();
 	}
-
+/*
 	public IpAddress getSourceAdrr() {
-		Datagram datagram = new Datagram(data);
-		return datagram.getSourceAddress();
+		return src;
 	}
-
+*/
 	//Crea el mensaje ICMP a enviar. Lo 
 	public void update() {
 		data[0] = type;
@@ -91,14 +312,14 @@ class ICMPMessage implements ICMPInterface {
 				data[5] = (byte) (idMessage & 0xff);
 				data[6] = (byte) (sequenceNumber >> 8);
 				data[7] = (byte) (sequenceNumber & 0xff);
-				if (type == ECHO_REQUEST) //Completamos los datos del mensaje
-					System.arraycopy(datosEcho, 0, data, 8, 20);
+				System.arraycopy(datosEcho, 0, data, 8, 20);
 				break;
 			case ECHO_REPLY:
 				data[4] = (byte) (idMessage >> 8);
 				data[5] = (byte) (idMessage & 0xff);
 				data[6] = (byte) (sequenceNumber >> 8);
 				data[7] = (byte) (sequenceNumber & 0xff);
+				System.arraycopy(datosEcho, 0, data, 8, 20);
 				break;
 			case ICMP.DESTINATION_UNREACHABLE: {
 				data[4] = 0x00;
@@ -358,6 +579,38 @@ class ICMPMessage implements ICMPInterface {
 		return (~sum & 0xffff);
 	}
 
+	private boolean validChecksum(){
+		DataInputStream ds = new DataInputStream(new ByteArrayInputStream(data,
+				0, data.length));
+		int sum = 0;
+		boolean theEnd = false;
+		while (!theEnd) {
+			try {
+				sum = sum + ds.readUnsignedShort();
+			} catch (EOFException e) {
+				theEnd = true;
+			} catch (IOException e) {
+				return false;
+			}
+		}
+		sum = (sum >> 16) + (sum & 0xffff);
+		sum += (sum >> 16);
+		int res = (~sum & 0xffff);
+		int sumAct;
+		ds = new DataInputStream(new ByteArrayInputStream(data,
+				2, 4));
+		try {
+			sumAct = (int)ds.readUnsignedShort();
+		} catch (IOException e) {
+			e.printStackTrace();
+			sumAct = -1;
+		}
+		if (sumAct == res)
+			return true;
+		else
+			return false;
+	}
+	
 	public byte[] getMessage(){
 		return toByteArray();
 	}
