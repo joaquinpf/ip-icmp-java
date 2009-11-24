@@ -49,26 +49,30 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		try {
 			icmpmsg = new ICMPMessage(p);
 		} catch (MalformedPacketException e) {
+			e.printStackTrace();
 			return false; // El paquete recibido estaba mal formado o no era un
 							// paquete ICMP
 		}
-		System.out.println("Se encontro un paquete ICMP proveniente de "
-				+ icmpmsg.getSourceAdrr());
+		System.out.println("Se encontro un paquete ICMP en la cola remota");
+//				+ icmpmsg.getSourceAdrr());
 		switch (icmpmsg.type) {
 			case ICMPMessage.ECHO_REQUEST: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
 				ICMPMessage rp = icmpmsg.reply();
 				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
 				try {
-					Datagram datagram = new Datagram((byte[]) p.getInfo());
+					Datagram datagram = new Datagram((byte[]) ((Datagram)p.getInfo()).toByte());
+					
+					IpAddress auxSrc = datagram.getSourceAddress();
 					datagram.setsourceAddress(datagram.getDestAddress());
-					datagram.setDestAddress(icmpmsg.getSourceAdrr());
+					datagram.setDestAddress(auxSrc);
 					datagram.setData(rp.toByteArray());
 					// El resto de los campos teoricamente los completa IP antes de
 					// mandar el datagram.
 					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
 					ip.addLoc(evReply);
 				} catch (Exception e) {
+					e.printStackTrace();
 					System.out
 							.println("Error en la generacion y envio de ECHO REPLY. Posible ruta no encontrada.");
 				}
@@ -131,7 +135,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				try {
 					Datagram datagram = new Datagram((byte[]) p.getInfo());
 					datagram.setsourceAddress(datagram.getDestAddress());
-					datagram.setDestAddress(icmpmsg.getSourceAdrr());
+					datagram.setDestAddress(datagram.getSourceAddress());
 					datagram.setData(rp.toByteArray());
 					// El resto de los campos teoricamente los completa IP antes de
 					// mandar el datagram.
@@ -158,7 +162,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				try {
 					Datagram datagram = new Datagram((byte[]) p.getInfo());
 					datagram.setsourceAddress(datagram.getDestAddress());
-					datagram.setDestAddress(icmpmsg.getSourceAdrr());
+					datagram.setDestAddress(datagram.getSourceAddress());
 					datagram.setData(rp.toByteArray());
 					// El resto de los campos teoricamente los completa IP antes de
 					// mandar el datagram.
@@ -416,16 +420,16 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		ICMPMessage icmpmsg = new ICMPMessage();
 		icmpmsg.data = new byte[28];
 		icmpmsg.type = (byte) 8;
-		icmpmsg.code = 0;
+		icmpmsg.code = 0x00;
 		icmpmsg.idMessage = msgId++;
 		icmpmsg.sequenceNumber = 1;
 		icmpmsg.datosEcho = new byte[20];
-		for (int i = 8; i < 20; i++)
-			icmpmsg.datosEcho[i - 8] = 0x55; //completamos el mensaje con 01010101 por cada byte
+		for (int i = 0; i < 20; i++)
+			icmpmsg.datosEcho[i] = 0x55; //completamos el mensaje con 01010101 por cada byte
 		//icmpmsg.update();
 		try {
 			// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
-			Datagram datagram = new Datagram(36);
+			Datagram datagram = new Datagram(28);
 			datagram.setDestAddress(dest);
 			datagram.setData(icmpmsg.toByteArray(), true);
 			datagram.setsourceAddress(this.ip.getLocalIpAddress());

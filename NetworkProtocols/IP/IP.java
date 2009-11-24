@@ -131,7 +131,10 @@ public class IP implements ProtocolInterface {
 				// una vez que se tiene el datagram completo, se pasa al
 				// nivel superior
 				
-				Datagram assembled = datagramPool .addDatagram(dd);
+				System.out.println("dd: "
+						+ dd);
+
+				Datagram assembled = datagramPool.addDatagram(dd);
 				
 				System.out.println("Envio local para IP: "
 						+ dd.getDestAddress().toString());
@@ -144,7 +147,7 @@ public class IP implements ProtocolInterface {
 												// entonces es un paquete
 												// ICMP
 					System.out.println("Recepcion de un mensaje ICMP.");
-					icmp.addRem(indN2); // .handle(indN2);
+					icmp.addRem(new eventoN3(eventoN3.INFO_RECEIVED, assembled)); // .handle(indN2);
 					return;
 				}
 				break;
@@ -166,15 +169,19 @@ public class IP implements ProtocolInterface {
 			IpAddress nxthop;
 			RoutingEntry re = rTable.getNextHop(dd.getDestAddress());
 			if (re == null) {
-				// Solicitar a ICMP el envio de aviso de error
-				// Teoricamente este send tendria que ser un
-				// icmp.addLoc(eventoN3);
-				// icmp.send(ICMP.DESTINATION_UNREACHABLE,
-				// ICMP.SOURCE_ROUTE_FAILED, dd.getSourceAddr(), dd);
-				ICMPPacketSend pack = new ICMPPacketSend(
-						ICMP.DESTINATION_UNREACHABLE, ICMP.SOURCE_ROUTE_FAILED,
-						dd.getSourceAddress(), dd);
-				icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+				if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
+					// Solicitar a ICMP el envio de aviso de error
+					// Teoricamente este send tendria que ser un
+					// icmp.addLoc(eventoN3);
+					// icmp.send(ICMP.DESTINATION_UNREACHABLE,
+					// ICMP.SOURCE_ROUTE_FAILED, dd.getSourceAddr(), dd);
+					ICMPPacketSend pack = new ICMPPacketSend(
+							ICMP.DESTINATION_UNREACHABLE, ICMP.SOURCE_ROUTE_FAILED,
+							dd.getSourceAddress(), dd);
+					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+				}
+				//Si es un paquete icmp no se envia un icmp sobre este mismo.
+				System.out.println("No se envia informacion ICMP DESTINATION_UNREACHABLE ya que se recibio un paquete ICMP.");
 				break;
 			}
 			if (re.getType()) {
@@ -208,30 +215,38 @@ public class IP implements ProtocolInterface {
 
 					dd.decrementTtl();
 					if (dd.getTtl() == 0) {
-						System.out
-								.println("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: "
-										+ dd.toString());
-						// Teoricamente este send tendria que ser un
-						// icmp.addLoc(eventoN3);
-						// icmp.send(ICMP.TIME_EXCEEDED,
-						// ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd.getSourceAddr(),
-						// dd);
-						ICMPPacketSend pack = new ICMPPacketSend(
-								ICMP.TIME_EXCEEDED,
-								ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd
-										.getSourceAddress(), dd);
-						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+						if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
+							System.out
+									.println("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+											+ dd.toString());
+							// Teoricamente este send tendria que ser un
+							// icmp.addLoc(eventoN3);
+							// icmp.send(ICMP.TIME_EXCEEDED,
+							// ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd.getSourceAddr(),
+							// dd);
+							ICMPPacketSend pack = new ICMPPacketSend(
+									ICMP.TIME_EXCEEDED,
+									ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd
+											.getSourceAddress(), dd);
+							icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+							return;
+						}
+						System.out.println("No se procede al envio del mensaje ICMP TTL_COUNT_EXCEEDED_TRANSMISION ya que el paquete es un ICMP");
 						return;
 					}
 
 					//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
 					if (dd.getTotalLength() > re.getInterface().getMTU() && dd.isFlags_fragm() == false){
-						System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
-								+ dd.toString());
-						ICMPPacketSend pack = new ICMPPacketSend(
-								ICMP.FRAGMENTATION_NEEDED_DF_1, ICMP.FRAGMENTATION_NEEDED_DF_1,
-								dd.getSourceAddress(), dd);
-						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+						if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
+							System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+									+ dd.toString());
+							ICMPPacketSend pack = new ICMPPacketSend(
+									ICMP.DESTINATION_UNREACHABLE, ICMP.FRAGMENTATION_NEEDED_DF_1,
+									dd.getSourceAddress(), dd);
+							icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+							return;
+						}
+						System.out.println("No se procede al envio del mensaje ICMP FRAGMENTATION_NEEDED_DF_1 ya que el paquete es un ICMP");
 						return;
 					}
 					
@@ -253,30 +268,37 @@ public class IP implements ProtocolInterface {
 				// a ICMP el envio de aviso de error
 				dd.decrementTtl();
 				if (dd.getTtl() == 0) {
-					System.out
-							.println("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: "
-									+ dd.toString());
-					// Teoricamente este send tendria que ser un
-					// icmp.addLoc(eventoN3);
-					// icmp.send(ICMP.TIME_EXCEEDED,
-					// ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd.getSourceAddr(),
-					// dd);
-					ICMPPacketSend pack = new ICMPPacketSend(
-							ICMP.TIME_EXCEEDED,
-							ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd
-									.getSourceAddress(), dd);
-					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+					if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
+						System.out
+								.println("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+										+ dd.toString());
+						// Teoricamente este send tendria que ser un
+						// icmp.addLoc(eventoN3);
+						// icmp.send(ICMP.TIME_EXCEEDED,
+						// ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd.getSourceAddr(),
+						// dd);
+						ICMPPacketSend pack = new ICMPPacketSend(
+								ICMP.TIME_EXCEEDED,
+								ICMP.TTL_COUNT_EXCEEDED_TRANSMISION, dd
+										.getSourceAddress(), dd);
+						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+						return;
+					}
+					System.out.println("No se procede al envio del mensaje ICMP TTL_COUNT_EXCEEDED_TRANSMISION ya que el paquete es un ICMP");
 					return;
 				}
-
 				//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
 				if (dd.getTotalLength() > re.getInterface().getMTU() && dd.isFlags_fragm() == false){
-					System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
-							+ dd.toString());
-					ICMPPacketSend pack = new ICMPPacketSend(
-							ICMP.FRAGMENTATION_NEEDED_DF_1, ICMP.FRAGMENTATION_NEEDED_DF_1,
-							dd.getSourceAddress(), dd);
-					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+					if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
+						System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+								+ dd.toString());
+						ICMPPacketSend pack = new ICMPPacketSend(
+								ICMP.DESTINATION_UNREACHABLE, ICMP.FRAGMENTATION_NEEDED_DF_1,
+								dd.getSourceAddress(), dd);
+						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+						return;
+					}
+					System.out.println("No se procede al envio del mensaje ICMP FRAGMENTATION_NEEDED_DF_1 ya que el paquete es un ICMP");
 					return;
 				}
 				
@@ -350,12 +372,19 @@ public class IP implements ProtocolInterface {
 
 				//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
 				if (dd.getTotalLength() > re.getInterface().getMTU() && dd.isFlags_fragm() == false){
-					System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
-							+ dd.toString());
-					ICMPPacketSend pack = new ICMPPacketSend(
-							ICMP.FRAGMENTATION_NEEDED_DF_1, ICMP.FRAGMENTATION_NEEDED_DF_1,
-							dd.getSourceAddress(), dd);
-					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+					if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
+						System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+								+ dd.toString());
+						ICMPPacketSend pack = new ICMPPacketSend(
+								ICMP.DESTINATION_UNREACHABLE, ICMP.FRAGMENTATION_NEEDED_DF_1,
+								dd.getSourceAddress(), dd);
+						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+						return;
+					}
+					String msg = new String("Type: " + ICMP.DESTINATION_UNREACHABLE + " ");
+					msg = msg.concat("DESTINATION_UNREACHABLE");
+					msg = msg.concat("  -  Codigo: " + ICMP.FRAGMENTATION_NEEDED_DF_1);
+					System.out.println(msg);
 					return;
 				}
 
@@ -379,15 +408,21 @@ public class IP implements ProtocolInterface {
 
 				//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
 				if (dd.getTotalLength() > re.getInterface().getMTU() && dd.isFlags_fragm() == false){
-					System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
-							+ dd.toString());
-					ICMPPacketSend pack = new ICMPPacketSend(
-							ICMP.FRAGMENTATION_NEEDED_DF_1, ICMP.FRAGMENTATION_NEEDED_DF_1,
-							dd.getSourceAddress(), dd);
-					icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+					if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
+						System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
+								+ dd.toString());
+						ICMPPacketSend pack = new ICMPPacketSend(
+								ICMP.DESTINATION_UNREACHABLE, ICMP.FRAGMENTATION_NEEDED_DF_1,
+								dd.getSourceAddress(), dd);
+						icmp.addLoc(new eventoN3(eventoN3.SEND, pack));
+						return;
+					}
+					String msg = new String("Type: " + ICMP.DESTINATION_UNREACHABLE + " ");
+					msg = msg.concat("DESTINATION_UNREACHABLE");
+					msg = msg.concat("  -  Codigo: " + ICMP.FRAGMENTATION_NEEDED_DF_1);
+					System.out.println(msg);
 					return;
 				}
-				
 				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
 				nxthop = re.getNextHop();
 

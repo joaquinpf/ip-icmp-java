@@ -215,6 +215,8 @@ public class FragAssembler {
 		
 
 		Datagram fragmento = new Datagram(contenidoFragmento);
+		fragmento.setFragmentar(true);
+		fragmento.setUltimoFragmento(true);
 		fragmento.genChecksum();
 		return fragmento;
 	}
