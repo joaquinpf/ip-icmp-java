@@ -133,15 +133,17 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				ICMPMessage rp = icmpmsg.reply();
 				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
 				try {
-					Datagram datagram = new Datagram((byte[]) p.getInfo());
+					Datagram datagram = new Datagram((byte[]) ((Datagram)p.getInfo()).toByte());
+					IpAddress auxSrc = datagram.getSourceAddress();
 					datagram.setsourceAddress(datagram.getDestAddress());
-					datagram.setDestAddress(datagram.getSourceAddress());
+					datagram.setDestAddress(auxSrc);
 					datagram.setData(rp.toByteArray());
 					// El resto de los campos teoricamente los completa IP antes de
 					// mandar el datagram.
 					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
 					ip.addLoc(evReply);
 				} catch (Exception e) {
+					e.printStackTrace();
 					System.out
 							.println("Error en la generacion y envio de TIMESTAMP REPLY. Posible ruta no encontrada.");
 				}
@@ -160,15 +162,17 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				ICMPMessage rp = icmpmsg.reply();
 				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
 				try {
-					Datagram datagram = new Datagram((byte[]) p.getInfo());
+					Datagram datagram = new Datagram((byte[]) ((Datagram)p.getInfo()).toByte());
+					IpAddress auxSrc = datagram.getSourceAddress();
 					datagram.setsourceAddress(datagram.getDestAddress());
-					datagram.setDestAddress(datagram.getSourceAddress());
+					datagram.setDestAddress(auxSrc);
 					datagram.setData(rp.toByteArray());
 					// El resto de los campos teoricamente los completa IP antes de
 					// mandar el datagram.
 					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
 					ip.addLoc(evReply);
 				} catch (Exception e) {
+					e.printStackTrace();
 					System.out
 							.println("Error en la generacion y envio de INFORMATION REPLY. Posible ruta no encontrada.");
 				}
@@ -344,7 +348,12 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			}
 				;
 				break;
-	
+			case ICMP.PARAMETER_PROBLEM: {
+				send(type, code, (byte)0x01, data);
+			}
+				;
+				break;
+
 				/*INFORMATION_REPLY se genera automaticamente en ICMPMessage cuando se detecta
 				 * Un INFORMATION Request	
 				 *

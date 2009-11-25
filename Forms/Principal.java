@@ -95,8 +95,13 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
-        txtTipoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "3", "4", "5", "8", "11", "12", "13", "14", "15", "16" })); //"Echo Request", "Echo Repply", "Destination Unreachable", "Source Quench", "Redirect", "Time Exceeded", "Parameter Problem", "Timestamp", "Timestamp Reply", "Information Request", "Information Reply" }));
-        txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" })); //"Echo Request", "Echo Repply", "Destination Unreachable", "Source Quench", "Redirect", "Time Exceeded", "Parameter Problem", "Timestamp", "Timestamp Reply", "Information Request", "Information Reply" }));
+        txtTipoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "3", "4", "5", "8", "11", "12", "13", "15" })); 
+        txtTipoICMP.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtTipoICMPFocusLost(evt);
+            }
+        });
+        txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" })); 
 
         javax.swing.GroupLayout panelEnvioLayout = new javax.swing.GroupLayout(panelEnvio);
         panelEnvio.setLayout(panelEnvioLayout);
@@ -263,10 +268,48 @@ public class Principal extends javax.swing.JFrame {
     }//GEN-LAST:event_cmdEnviarArchivoActionPerformed
 
     private void cmdEnviarPaqueteICMPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnviarPaqueteICMPActionPerformed
-    	
-    	conf.getIP().getICMPProtocol().send(new Integer(Integer.parseInt(this.txtTipoICMP.getSelectedItem().toString())).byteValue(), new Integer(Integer.parseInt(this.txtCodigoICMP.getSelectedItem().toString())).byteValue(), conf.getAddrDstSimulada(), new Datagram(36));
+    	if (Integer.parseInt(this.txtTipoICMP.getSelectedItem().toString()) != 12)
+    		conf.getIP().getICMPProtocol().send(new Integer(Integer.parseInt(this.txtTipoICMP.getSelectedItem().toString())).byteValue(), new Integer(Integer.parseInt(this.txtCodigoICMP.getSelectedItem().toString())).byteValue(), conf.getAddrDstSimulada(), new Datagram(36));
+    	else{
+    		Datagram data = new Datagram(36);
+    		data.setsourceAddress(conf.getAddrDstSimulada());
+    		conf.getIP().getICMPProtocol().send(new Integer(Integer.parseInt(this.txtTipoICMP.getSelectedItem().toString())).byteValue(), new Integer(Integer.parseInt(this.txtCodigoICMP.getSelectedItem().toString())).byteValue(), (byte)0x03, data);
+    	}
     }//GEN-LAST:event_cmdEnviarPaqueteICMPActionPerformed
 
+    private void txtTipoICMPFocusLost(java.awt.event.FocusEvent evt) {
+    	// "3", "4", "5", "8", "11", "12", "13", "15"
+    	switch (Integer.parseInt(this.txtTipoICMP.getSelectedItem().toString())){
+			case 3:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5" }));
+		    	break;
+			case 4:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
+		    	break;
+			case 5:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3" }));
+		    	break;
+			case 8:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
+		    	break;
+			case 11:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1" }));
+		    	break;
+			case 12:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
+		    	break;
+			case 13:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
+		    	break;
+			case 15:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
+		    	break;
+    	}
+    }
+
+    
+    
+    
     /**
     * @param args the command line arguments
     */

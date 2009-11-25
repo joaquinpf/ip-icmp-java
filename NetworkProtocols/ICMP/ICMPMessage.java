@@ -484,7 +484,7 @@ class ICMPMessage implements ICMPInterface {
 			case INFORMATION_REQUEST:
 				rep = new ICMPMessage();
 				rep.data = new byte[data.length];
-				rep.type = TIMESTAMP_REPLY;
+				rep.type = INFORMATION_REPLY;
 				rep.code = code;
 				rep.identificador = new byte[2];
 				rep.nroSecuencia = new byte[2];
@@ -505,58 +505,120 @@ class ICMPMessage implements ICMPInterface {
 		switch (type) {
 		case ECHO_REQUEST:
 			msg = msg.concat("ECHO_REQUEST");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 		case ECHO_REPLY:
 			msg = msg.concat("ECHO_REPLY");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 		case ICMP.DESTINATION_UNREACHABLE: 
 			msg = msg.concat("DESTINATION_UNREACHABLE");
+			switch (code){
+			case 0:
+				msg = msg.concat("  -  Codigo: " + code + " (Red inaccesible) ");
+				break;
+			case 1:
+				msg = msg.concat("  -  Codigo: " + code + " (Host inaccesible) ");
+				break;
+			case 2:
+				msg = msg.concat("  -  Codigo: " + code + " (Protocolo inaccesible) ");
+				break;
+			case 3:
+				msg = msg.concat("  -  Codigo: " + code + " (Puerto inaccesible) ");
+				break;
+			case 4:
+				msg = msg.concat("  -  Codigo: " + code + " (Se necesitaba fragmentacion pero DF estaba activado) ");
+				break;
+			case 5:
+				msg = msg.concat("  -  Codigo: " + code + " (Fallo en la ruta de origen) ");
+				break;
+			default:
+				msg = msg.concat("  -  Codigo: " + code + " ");	
+				break;
+		}
 			break;
 
 		case ICMP.SOURCE_QUENCH: 
 			msg = msg.concat("SOURCE_QUENCH");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.REDIRECT: 
 			msg = msg.concat("REDIRECT");
+			switch (code){
+				case 0:
+					msg = msg.concat("  -  Codigo: " + code + " (Redirigir datagramas debido a la red) ");
+					break;
+				case 1:
+					msg = msg.concat("  -  Codigo: " + code + " (Redirigir datagramas debido al host) ");
+					break;
+				case 2:
+					msg = msg.concat("  -  Codigo: " + code + " (Redirigir datagramas debido al tipo de servicio y la red) ");
+					break;
+				case 3:
+					msg = msg.concat("  -  Codigo: " + code + " (Redirigir datagramas debido al tipo de servicio y al host) ");
+					break;
+				default:
+					msg = msg.concat("  -  Codigo: " + code + " ");	
+					break;
+			}
 			break;
 
 		case ICMP.ROUTER_ADVERT: 
 			msg = msg.concat("ROUTER_ADVERT");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.ROUTER_SOLICIT: 
 			msg = msg.concat("ROUTER_SOLICIT");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.TIME_EXCEEDED: 
 			msg = msg.concat("TIME_EXCEEDED");
+			switch (code){
+				case 0:
+					msg = msg.concat("  -  Codigo: " + code + " (Tiempo de vida superado en transito) ");
+					break;
+				case 1:
+					msg = msg.concat("  -  Codigo: " + code + " (Tiempo de reensamblaje de fragmentos superado) ");
+					break;
+				default:
+					msg = msg.concat("  -  Codigo: " + code + " ");	
+					break;
+			}	
 			break;
 
 		case ICMP.PARAMETER_PROBLEM: 
 			msg = msg.concat("PARAMETER_PROBLEM");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.TIMESTAMP: 
 			msg = msg.concat("TIMESTAMP_REQUEST");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.TIMESTAMP_REPLY: 
 			msg = msg.concat("TIMESTAMP_REPLY");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.INFORMATION_REQUEST: 
 			msg = msg.concat("INFORMATION_REQUEST");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.INFORMATION_REPLY: 
 			msg = msg.concat("INFORMATION_REPLY");
+			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		default: 
 			return "No se pudo crear el mensaje. No se encontro el tipo de mensaje. Tipo " + type + " código " + code;
 		}
-		msg = msg.concat("  -  Codigo: " + code + " \n Paquete: " + toByteValueString(data));
+
+		msg = msg.concat("\n Paquete: " + toByteValueString(data));
 		return msg;
 	}
 
@@ -618,7 +680,7 @@ class ICMPMessage implements ICMPInterface {
 	public String toByteValueString(byte[] val){
 		String ret = new String();
 		for (int i = 0; i < val.length; i++)
-			ret = ret.concat(String.format("%x", val[i]).toUpperCase());
+			ret = ret.concat(String.format("%X", val[i]).toUpperCase());
 		return ret;
 	}
 }
