@@ -36,6 +36,7 @@ public class IP implements ProtocolInterface {
 	ICMP icmp;
 	IpAddress localAddress = null;
 	private DatagramPool datagramPool = new DatagramPool();
+	private ApplicationInterface app = null;
 	
 	public IP(Interfaces ifs) throws NodeException {
 		buffRem = new Queue(); // Instanciacion del buffer de recepcion de
@@ -56,7 +57,11 @@ public class IP implements ProtocolInterface {
 	public void setLocalIpAddress(IpAddress loc) {
 		this.localAddress = loc;
 	}
-
+	
+	public void setApplication(ApplicationInterface app){
+		this.app = app;
+	}
+	
 	// Obtener direccion local
 	public IpAddress getLocalIpAddress() {
 		return this.localAddress;
@@ -149,6 +154,10 @@ public class IP implements ProtocolInterface {
 					System.out.println("Recepcion de un mensaje ICMP.");
 					icmp.addRem(new eventoN3(eventoN3.INFO_RECEIVED, assembled)); // .handle(indN2);
 					return;
+				}
+				if (assembled != null && dd.getProtocol() == 6) {//Si es TCP
+					if (this.app != null)
+						app.receiveMessage(assembled.getMessage());
 				}
 				break;
 			}
