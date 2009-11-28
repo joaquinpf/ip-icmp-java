@@ -29,7 +29,7 @@ public class FragAssembler {
 			}
 			else // sino tengo que fragmentar. 
 			{
-				int longitudCabecera = datagram.getTotalLength() - datagram.getMessage().length ;
+				int longitudCabecera = datagram.getHeaderLength() * 4;//datagram.getTotalLength() - datagram.getMessage().length;
 				int longitudFragmento = mtu - longitudCabecera;
 
 				//la longitud total debe ser estrictamente multiplo de 8 para poder calcular correctamente el offset

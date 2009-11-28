@@ -11,13 +11,24 @@
 
 package Forms;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import Exceptions.AddressException;
+import NetworkProtocols.eventoN3;
 import NetworkProtocols.IP.Datagram;
+import NetworkProtocols.IP.DatagramPool;
+import NetworkProtocols.IP.FragAssembler;
+import NetworkProtocols.IP.Address.IpAddress;
+import Utils.ApplicationInterface;
+import Utils.BinaryManipulator;
 
 /**
  *
  * @author Administrator
  */
-public class Principal extends javax.swing.JFrame {
+public class Principal extends javax.swing.JFrame implements ApplicationInterface {
 	private Configuracion conf = null;
 	
 	private static final long serialVersionUID = 1309657564278601339L;
@@ -260,11 +271,27 @@ public class Principal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdEnviarTextoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnviarTextoActionPerformed
-    	// TODO add your handling code here:
+		byte[] message1 = this.txtTextoAEnviar.getText().getBytes();
+		Datagram d1 = new Datagram(message1.length);
+		d1.setDestAddress(conf.getAddrDstSimulada()); //La direccion origen del datagram original es la destino de este
+		d1.setsourceAddress(conf.getIP().getLocalIpAddress());
+		d1.setProtocol(6); //TCP, tomado en este caso como aplicacion
+		d1.setData(message1, true);
+		d1.genChecksum();
+		eventoN3 evReq = new eventoN3(eventoN3.SEND, d1);
+		conf.getIP().addLoc(evReq);
     }//GEN-LAST:event_cmdEnviarTextoActionPerformed
 
     private void cmdEnviarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnviarArchivoActionPerformed
-        // TODO add your handling code here:
+		byte[] message1 = BinaryManipulator.readByteArray(this.txtArchivoAEnviar.getText());
+		Datagram d1 = new Datagram(message1.length);
+		d1.setDestAddress(conf.getAddrDstSimulada()); //La direccion origen del datagram original es la destino de este
+		d1.setsourceAddress(conf.getIP().getLocalIpAddress());
+		d1.setProtocol(6); //TCP, tomado en este caso como aplicacion
+		d1.setData(message1, true);
+		d1.genChecksum();
+		eventoN3 evReq = new eventoN3(eventoN3.SEND, d1);
+		conf.getIP().addLoc(evReq);
     }//GEN-LAST:event_cmdEnviarArchivoActionPerformed
 
     private void cmdEnviarPaqueteICMPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnviarPaqueteICMPActionPerformed
@@ -307,7 +334,19 @@ public class Principal extends javax.swing.JFrame {
     	}
     }
 
+	@Override
+	public void receiveMessage(Object o) {
+		byte receive[] = (byte[])o;
+		System.out.println("Datos recibidos: " + toByteValueString(receive));
+	}
     
+	public String toByteValueString(byte[] val){
+		String ret = new String();
+		for (int i = 0; i < val.length; i++)
+			ret = ret.concat(String.format("%X", val[i]).toUpperCase());
+		return ret;
+	}
+
     
     
     /**
