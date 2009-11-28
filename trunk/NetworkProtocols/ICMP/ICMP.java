@@ -38,9 +38,9 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	public ICMP(){//IP ip) {
 		NetworkProtocols.addProtocol(NetworkProtocols.PROTO_ICMP, this);
 		this.ip = (IP) NetworkProtocols.getProtocol(NetworkProtocols.PROTO_IP);
-		this.rdr = new Reader(this);
 		buffRem = new Queue();
 		buffLoc = new Queue();
+		this.rdr = new Reader(this);
 	}
 
 	public boolean handle(eventoN3 p) { // Es invocado cuando IP recibe un
