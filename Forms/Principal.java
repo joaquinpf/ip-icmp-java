@@ -36,6 +36,7 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
     public Principal(Configuracion c) {
         initComponents();
         this.conf = c;
+        conf.getIP().setApplication(this);
     }
 
     /** This method is called from within the constructor to
