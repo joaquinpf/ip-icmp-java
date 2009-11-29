@@ -262,6 +262,8 @@ public class Datagram {
 		// FALTA la parte de payloas
 		message = new byte[byt.length - (ihl * 4)];
 		System.arraycopy(byt, (ihl * 4), message, 0, byt.length - (ihl * 4));
+		
+		updateTotalLength();
 	}
 
 	/**
@@ -567,10 +569,14 @@ public class Datagram {
 		this.genChecksum();
 	}
 	
+	public void updateTotalLength(){
+		totalLength = getHeaderLength() * 4 + message.length;
+	}
+	
 	public void setData(byte[] data, boolean updateTotalLength){
 		this.message = data.clone();
 		if (updateTotalLength == true)
-			totalLength = getHeaderLength() * 4 + data.length;
+			updateTotalLength();
 		this.genChecksum();
 	}
 

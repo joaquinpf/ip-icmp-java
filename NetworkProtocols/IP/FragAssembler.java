@@ -91,7 +91,7 @@ public class FragAssembler {
 		
 		//total length
 		contenidoFragmento[2] = (byte) (longFragmento + longHeader >> 8);      
-		contenidoFragmento[3] = (byte) (longFragmento + longHeader & 0x00ff);
+		contenidoFragmento[3] = (byte) (longFragmento + longHeader & 0xffff);
 
 		//bytes del Id del datagrama
 		contenidoFragmento[4] = (byte) (base.getDatagramId() >> 8);
@@ -133,6 +133,7 @@ public class FragAssembler {
 		}
 
 		Datagram fragmento = new Datagram(contenidoFragmento);
+		fragmento.updateTotalLength();
 		fragmento.genChecksum();
 		return fragmento;
 	}
