@@ -54,7 +54,7 @@ public class Interface {
 		proto = proto + (int) (b[1]);
 		int y = b.length - 2;
 		rec = new byte[y];
-		for (int i = 0; i < y - 2; i++)
+		for (int i = 0; i < y; i++)
 			rec[i] = b[i + 2];
 		// Invoca al protocolo correspondiente. No seria necesario codigo para
 		// cada protocolo, siempre
@@ -95,7 +95,7 @@ public class Interface {
 		byte[] nf = new byte[frame.length + 2];
 		int l;
 		l = frame.length;
-		for (int i = 2; i < l; i++)
+		for (int i = 2; i < l + 2; i++)
 			nf[i] = frame[i - 2];
 		nf[0] = (byte) (protocol >> 8 & 0x000000ff);
 		nf[1] = (byte) (protocol & 0x000000ff);

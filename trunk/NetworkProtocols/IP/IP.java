@@ -3,6 +3,7 @@ package NetworkProtocols.IP;
 import java.util.List;
 
 import Exceptions.*;
+import Forms.Principal;
 import Interface.*;
 import Utils.*;
 import NetworkProtocols.*;
@@ -88,6 +89,7 @@ public class IP implements ProtocolInterface {
 	public void receive_rem(eventoN3 indN2) {
 		System.out.println("Encontro requerimiento en cola remota ip tipo "
 				+ indN2.getControl());
+		Principal.addReceived("Encontro requerimiento en cola remota ip\n");
 		// Segun la primitiva recibida, toma la accion que corresponda
 		int ici = indN2.getControl();
 		byte[] bb;
@@ -101,6 +103,8 @@ public class IP implements ProtocolInterface {
 			// del header IP, luego hace los cheqieos para determinar si el
 			// dgram es correcto
 			Datagram dd = new Datagram(bb);
+			System.out.println("Bytes de datos recibidos: " + toByteValueString(dd.getData()));
+			Principal.addReceived("Bytes de datos recibidos: " + toByteValueString(dd.getData()) + "\n");
 			int longrec = bb.length;
 			System.out.println("DATAGRAM recibido por IP long total recibida ("
 					+ longrec + " ) " + dd.toString());
@@ -115,6 +119,7 @@ public class IP implements ProtocolInterface {
 					|| (dd.verifyChecksum() == false)) {
 				System.out
 						.println("Error al chequear datagram, se descarta datagram silenciosamente");
+				Principal.addReceived("Error al chequear datagram, se descarta datagram silenciosamente\n");
 				break;
 			}
 			// Si el header IP contiene opciones, procesarlas. El proceso agota
@@ -143,6 +148,7 @@ public class IP implements ProtocolInterface {
 				
 				System.out.println("Envio local para IP: "
 						+ dd.getDestAddress().toString());
+				Principal.addReceived("Envio local para IP: " + dd.getDestAddress().toString() + "\n");
 				// local_delivery(dd)
 				System.out.println("assembled: "
 						+ assembled);
@@ -152,6 +158,7 @@ public class IP implements ProtocolInterface {
 												// entonces es un paquete
 												// ICMP
 					System.out.println("Recepcion de un mensaje ICMP.");
+					Principal.addReceived("Recepcion de un mensaje ICMP\n");
 					icmp.addRem(new eventoN3(eventoN3.INFO_RECEIVED, assembled)); // .handle(indN2);
 					return;
 				}
@@ -191,6 +198,7 @@ public class IP implements ProtocolInterface {
 				}
 				//Si es un paquete icmp no se envia un icmp sobre este mismo.
 				System.out.println("No se envia informacion ICMP DESTINATION_UNREACHABLE ya que se recibio un paquete ICMP.");
+				Principal.addReceived("No se envia informacion ICMP DESTINATION_UNREACHABLE ya que se recibio un paquete ICMP\n");
 				break;
 			}
 			if (re.getType()) {
@@ -207,11 +215,13 @@ public class IP implements ProtocolInterface {
 					
 					System.out.println("Envio local para IP: "
 							+ dd.getDestAddress().toString());
+					Principal.addReceived("Envio local para IP: " + dd.getDestAddress().toString() + "\n");
 					// local_delivery(dd)
 					if (assembled != null && dd.getProtocol() == 1) { // Si el protocolo es 1
 													// entonces es un paquete
 													// ICMP
 						System.out.println("Recepcion de un mensaje ICMP.");
+						Principal.addReceived("Recepcion de un mensaje ICMP\n");
 						icmp.addRem(indN2); // .handle(indN2);
 						return;
 					}
@@ -228,6 +238,7 @@ public class IP implements ProtocolInterface {
 							System.out
 									.println("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: "
 											+ dd.toString());
+							Principal.addReceived("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: " + dd.toString() + "\n");
 							// Teoricamente este send tendria que ser un
 							// icmp.addLoc(eventoN3);
 							// icmp.send(ICMP.TIME_EXCEEDED,
@@ -241,6 +252,7 @@ public class IP implements ProtocolInterface {
 							return;
 						}
 						System.out.println("No se procede al envio del mensaje ICMP TTL_COUNT_EXCEEDED_TRANSMISION ya que el paquete es un ICMP");
+						Principal.addReceived("No se procede al envio del mensaje ICMP TTL_COUNT_EXCEEDED_TRANSMISION ya que el paquete es un ICMP\n");
 						return;
 					}
 
@@ -249,6 +261,7 @@ public class IP implements ProtocolInterface {
 						if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
 							System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
 									+ dd.toString());
+							Principal.addReceived("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: " + dd.toString() + "\n");
 							ICMPPacketSend pack = new ICMPPacketSend(
 									ICMP.DESTINATION_UNREACHABLE, ICMP.FRAGMENTATION_NEEDED_DF_1,
 									dd.getSourceAddress(), dd);
@@ -256,6 +269,7 @@ public class IP implements ProtocolInterface {
 							return;
 						}
 						System.out.println("No se procede al envio del mensaje ICMP FRAGMENTATION_NEEDED_DF_1 ya que el paquete es un ICMP");
+						Principal.addReceived("No se procede al envio del mensaje ICMP FRAGMENTATION_NEEDED_DF_1 ya que el paquete es un ICMP\n");
 						return;
 					}
 					
@@ -267,6 +281,7 @@ public class IP implements ProtocolInterface {
 
 						System.out.println("Envio directo para IP: "
 								+ fragment.getDestAddress().toString());
+						Principal.addReceived("Envio directo para IP: "	+ fragment.getDestAddress().toString() + "\n");
 					}
 				}
 			} else {
@@ -281,6 +296,7 @@ public class IP implements ProtocolInterface {
 						System.out
 								.println("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: "
 										+ dd.toString());
+						Principal.addReceived("Tiempo de vida superado. Se envia mensaje de aviso ICMP al emisor. Datagram: " + dd.toString() + "\n");
 						// Teoricamente este send tendria que ser un
 						// icmp.addLoc(eventoN3);
 						// icmp.send(ICMP.TIME_EXCEEDED,
@@ -294,6 +310,7 @@ public class IP implements ProtocolInterface {
 						return;
 					}
 					System.out.println("No se procede al envio del mensaje ICMP TTL_COUNT_EXCEEDED_TRANSMISION ya que el paquete es un ICMP");
+					Principal.addReceived("No se procede al envio del mensaje ICMP TTL_COUNT_EXCEEDED_TRANSMISION ya que el paquete es un ICMP\n");
 					return;
 				}
 				//Si no se permite fragmentacion y su tamaño > MTU -> Devolver que se necesita fragmentacion
@@ -301,6 +318,7 @@ public class IP implements ProtocolInterface {
 					if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
 						System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
 								+ dd.toString());
+						Principal.addReceived("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: " + dd.toString() + "\n");
 						ICMPPacketSend pack = new ICMPPacketSend(
 								ICMP.DESTINATION_UNREACHABLE, ICMP.FRAGMENTATION_NEEDED_DF_1,
 								dd.getSourceAddress(), dd);
@@ -308,6 +326,7 @@ public class IP implements ProtocolInterface {
 						return;
 					}
 					System.out.println("No se procede al envio del mensaje ICMP FRAGMENTATION_NEEDED_DF_1 ya que el paquete es un ICMP");
+					Principal.addReceived("No se procede al envio del mensaje ICMP FRAGMENTATION_NEEDED_DF_1 ya que el paquete es un ICMP\n");
 					return;
 				}
 				
@@ -320,6 +339,7 @@ public class IP implements ProtocolInterface {
 					System.out.println("Envio indirecto para IP: "
 							+ fragment.getDestAddress().toString() + " por router "
 							+ nxthop.toString());
+					Principal.addReceived("Envio indirecto para IP: " + fragment.getDestAddress().toString() + " por router " + nxthop.toString() + "\n");
 				}
 				
 			}
@@ -334,6 +354,7 @@ public class IP implements ProtocolInterface {
 	// control de l ainterfa, y un objeto conteniendo la idu
 	public void receive_loc(eventoN3 idu) {
 		System.out.println("Encontro requerimiento en cola local ip");
+		Principal.addSended("Encontro requerimiento en cola local ip\n");
 		// Segun la primitiva recibida, toma la accion que corresponda
 		int ici = idu.getControl();
 		// Ver que es lo que hace esto porq no hace nada...
@@ -349,6 +370,7 @@ public class IP implements ProtocolInterface {
 			IpAddress nxthop;
 			RoutingEntry re = rTable.getNextHop(dd.getDestAddress());
 			System.out.println("Requerimiento local destino a " + dd.getDestAddress().toString());
+			Principal.addSended("Requerimiento local destino a " + dd.getDestAddress().toString() + "\n");
 
 			if (re == null) {
 				// Solicitar a ICMP el envio de aviso de error
@@ -367,6 +389,7 @@ public class IP implements ProtocolInterface {
 					msg = msg.concat("DESTINATION_UNREACHABLE");
 					msg = msg.concat("  -  Codigo: " + ICMP.SOURCE_ROUTE_FAILED);
 					System.out.println(msg);
+					Principal.addSended(msg + "\n");
 				}
 				break;
 			}
@@ -394,18 +417,26 @@ public class IP implements ProtocolInterface {
 					msg = msg.concat("DESTINATION_UNREACHABLE");
 					msg = msg.concat("  -  Codigo: " + ICMP.FRAGMENTATION_NEEDED_DF_1);
 					System.out.println(msg);
+					Principal.addSended(msg + "\n");
 					return;
 				}
 
 				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
 				
 				nxthop = re.getNextHop();
-				
-				for(Datagram fragment: fragments) {
+				int i = 0;
+				int total = fragments.size();
+				for(Datagram fragment : fragments){//.get(i); i < fragments.size(); i++) {
+					System.out.println("Fragmento: " + (i + 1) + " de " + total);
+					System.out.println("Bytes del fragmento a enviar: " + toByteValueString(fragment.toByte()));
+					System.out.println("Bytes de datos del fragmento a enviar: " + toByteValueString(fragment.getData()));
+					Principal.addSended("Fragmento: " + (i + 1) + " de " + fragments.size() + " - Bytes del fragmento a enviar: " + toByteValueString(fragment.toByte()) + "\n");
 					re.getInterface().send(NetworkProtocols.PROTO_IP, fragment.toByte());
 
 					System.out.println("Envio directo para IP: "
 							+ fragment.getDestAddress().toString());
+					Principal.addSended("Envio directo para IP: " + fragment.getDestAddress().toString() + "\n");
+					i++;
 				}
 			} else {
 				// ruteo indirecto, nexthop el de la entrada de ruteo,
@@ -420,6 +451,7 @@ public class IP implements ProtocolInterface {
 					if (dd.getProtocol() != 1){ //Si el mensaje no es un ICMP se procede a enviar el paquete ICMP
 						System.out.println("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: "
 								+ dd.toString());
+						Principal.addSended("El datagrama no permite fragmentacion y su tamaño es mayor que el MTU. Se envia mensaje de aviso ICMP al emisor. Datagram: " + dd.toString() + "\n");
 						ICMPPacketSend pack = new ICMPPacketSend(
 								ICMP.DESTINATION_UNREACHABLE, ICMP.FRAGMENTATION_NEEDED_DF_1,
 								dd.getSourceAddress(), dd);
@@ -430,6 +462,7 @@ public class IP implements ProtocolInterface {
 					msg = msg.concat("DESTINATION_UNREACHABLE");
 					msg = msg.concat("  -  Codigo: " + ICMP.FRAGMENTATION_NEEDED_DF_1);
 					System.out.println(msg);
+					Principal.addSended(msg + "\n");
 					return;
 				}
 				List<Datagram> fragments = FragAssembler.fragmentar(dd, re.getInterface().getMTU());
@@ -441,6 +474,7 @@ public class IP implements ProtocolInterface {
 					System.out.println("Envio indirecto para IP: "
 							+ fragment.getDestAddress().toString() + " por router "
 							+ nxthop.toString());
+					Principal.addSended("Envio indirecto para IP: " + fragment.getDestAddress().toString() + " por router " + nxthop.toString() + "\n");
 				}
 
 			}
@@ -485,6 +519,13 @@ public class IP implements ProtocolInterface {
 
 	public void delRoutingEntry(IpAddress dstNet, Mask mask) {
 		rTable.delRoute(dstNet, mask);
+	}
+
+	public String toByteValueString(byte[] val){
+		String ret = new String();
+		for (int i = 0; i < val.length; i++)
+			ret = ret.concat(String.format("%X", val[i]).toUpperCase());
+		return ret;
 	}
 
 	class Reader extends Thread {

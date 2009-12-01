@@ -24,9 +24,12 @@ public class Link {
 	public Link(String laddr, String lport, String raddr, String rport)
 			throws NodeException {
 
-		getremoteaddr(laddr, lport);
+		getremoteaddr(raddr, rport);
+		getlocaladdr(laddr, lport);
+/*		
+ 		getremoteaddr(laddr, lport);
 		getlocaladdr(raddr, rport);
-
+*/
 		try {
 			socket = new DatagramSocket(localport, localaddr); // Crea el socket
 		} catch (SocketException e) {

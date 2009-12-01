@@ -10,6 +10,10 @@ import NetworkProtocols.IP.Address.IpAddress;
 public class Datagram {
 
 	/**
+	 * id utilizado para los datagrams q se crean con Datagram(int)
+	 */
+	private static int datId = 1;
+	/**
 	 * Version de IP (4) (4 bits)
 	 */
 	private int version;         
@@ -212,6 +216,7 @@ public class Datagram {
 		System.out.println("BYTES 2 3 4 5 "+byt[2]+"  "+byt[3]+"  "+byt[4]+"  "+byt[5]);
 		totalLength = (int) (byt[2]<<8) + (int) byt[3];
 		datagramId = (int) ((byt[4]<<8)&0x00ffff) + (int) (byt[5]&0x00ff);
+		datId = datagramId + 1;
 		flags_nousado = false;
 		x = (byte) (byt[6] & 0x80);
 		if(x != 0) flags_nousado = true;
@@ -309,6 +314,7 @@ public class Datagram {
 			totalLength = ttol;
 			if((did < 0) || (did > 65535)) throw new DatagramException("Campo DATAGRAMID fuera de rango");
 			datagramId = did;
+			datId = datagramId + 1;
 			flags_nousado = fnu;
 			flags_ultfrag = fuf;
 			flags_fragm = frg;
@@ -354,7 +360,8 @@ public class Datagram {
 //			if((ttol < 0) || (ttol > 65535)) throw new DatagramException("Campo TOTALLENGTH fuera de rango");
 		totalLength = 20 + lengthData;
 //			if((did < 0) || (did > 65535)) throw new DatagramException("Campo DATAGRAMID fuera de rango");
-		datagramId = 95;
+		datagramId = datId;
+		datId = datagramId + 1;
 		flags_nousado = false;
 		flags_ultfrag = true;
 		flags_fragm = true;
@@ -524,7 +531,7 @@ public class Datagram {
 		if(flags_fragm) fff=fff+"DNTF"; else fff=fff+"-";
 		String fip = "DG IP: V:"+version+" HL:"+ihl+" TOS-P:"+precedence+"-"+dtrcu+" TLN:"+totalLength+
 		" DGId:"+datagramId+" Flg:"+fff+" OFF:"+fragOffset+" TTL:"+ttl+" PROT:"+protocol+
-		" chks:"+checksum+" DST:"+sourceAddress.toString()+" SRC:"+destAddress.toString();
+		" chks:"+checksum+" DST:"+destAddress.toString()+" SRC:"+sourceAddress.toString();
 		return fip;
 	} 
 

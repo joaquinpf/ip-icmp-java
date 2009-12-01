@@ -45,6 +45,13 @@ public class Linksender extends Thread {
 		}
 	}
 
+	public String toByteValueString(byte[] val){
+		String ret = new String();
+		for (int i = 0; i < val.length; i++)
+			ret = ret.concat(String.format("%X", val[i]).toUpperCase());
+		return ret;
+	}
+
 	// En el ciclo, envia os frames
 	public void run() {
 		while (true) {
@@ -52,6 +59,7 @@ public class Linksender extends Thread {
 				while (TQueue.size() != 0) {
 					byte[] frame = (byte[]) TQueue.peekFront();
 					enviar(frame);
+					System.out.println("Bytes del fragmento a enviar: " + toByteValueString(frame));
 					TQueue.popFront();
 				}
 			}
