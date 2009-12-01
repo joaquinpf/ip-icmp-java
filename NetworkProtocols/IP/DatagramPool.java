@@ -3,8 +3,6 @@ package NetworkProtocols.IP;
 import java.util.HashMap;
 import java.util.Map;
 
-import Utils.BinaryManipulator;
-
 public class DatagramPool {
 	
 	private Map<String,FragmentPool> datagrams = new HashMap<String, FragmentPool>();

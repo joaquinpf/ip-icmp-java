@@ -3,6 +3,7 @@ package NetworkProtocols.ICMP;
 //import java.util.Date;
 
 import Exceptions.*;
+import Forms.Principal;
 //import Interface.*;
 import Utils.*;
 import NetworkProtocols.*;
@@ -54,12 +55,15 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 							// paquete ICMP
 		}
 		System.out.println("Se encontro un paquete ICMP en la cola remota");
+		Principal.addReceived("Se encontro un paquete ICMP en la cola remota\n");
 //				+ icmpmsg.getSourceAdrr());
 		switch (icmpmsg.type) {
 			case ICMPMessage.ECHO_REQUEST: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 				ICMPMessage rp = icmpmsg.reply();
 				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
+				Principal.addSended("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString() + "\n");
 				try {
 					Datagram datagram = new Datagram((byte[]) ((Datagram)p.getInfo()).toByte());
 					
@@ -75,6 +79,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 					e.printStackTrace();
 					System.out
 							.println("Error en la generacion y envio de ECHO REPLY. Posible ruta no encontrada.");
+					Principal.addSended("Error en la generacion y envio de ECHO REPLY. Posible ruta no encontrada.\n");
 				}
 			}
 				;
@@ -82,56 +87,66 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMPMessage.ECHO_REPLY: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.DESTINATION_UNREACHABLE: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.SOURCE_QUENCH: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.REDIRECT: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.ROUTER_ADVERT: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.ROUTER_SOLICIT: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.TIME_EXCEEDED: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.PARAMETER_PROBLEM: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.TIMESTAMP: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString());
 				ICMPMessage rp = icmpmsg.reply();
 				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
+				Principal.addSended("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString() + "\n");
 				try {
 					Datagram datagram = new Datagram((byte[]) ((Datagram)p.getInfo()).toByte());
 					IpAddress auxSrc = datagram.getSourceAddress();
@@ -146,6 +161,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 					e.printStackTrace();
 					System.out
 							.println("Error en la generacion y envio de TIMESTAMP REPLY. Posible ruta no encontrada.");
+					Principal.addSended("Error en la generacion y envio de TIMESTAMP REPLY. Posible ruta no encontrada.\n");
 				}
 			}
 				;
@@ -153,14 +169,17 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMPMessage.TIMESTAMP_REPLY: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
 	
 			case ICMPMessage.INFORMATION_REQUEST: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 				ICMPMessage rp = icmpmsg.reply();
 				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
+				Principal.addSended("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString() + "\n");
 				try {
 					Datagram datagram = new Datagram((byte[]) ((Datagram)p.getInfo()).toByte());
 					IpAddress auxSrc = datagram.getSourceAddress();
@@ -175,6 +194,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 					e.printStackTrace();
 					System.out
 							.println("Error en la generacion y envio de INFORMATION REPLY. Posible ruta no encontrada.");
+					Principal.addSended("Error en la generacion y envio de INFORMATION REPLY. Posible ruta no encontrada.\n");
 				}
 
 			}
@@ -183,6 +203,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMPMessage.INFORMATION_REPLY: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
 			}
 				;
 				break;
@@ -190,9 +211,11 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			default: {
 				System.out.print("El codigo del paquete ICMP no es válido. Tipo: "
 						+ icmpmsg.type);
+				Principal.addReceived("El codigo del paquete ICMP no es válido. Tipo: " + icmpmsg.type + "\n");
 				try {
 					System.out.print(" tipo no implementado. Etiqueta: "
 							+ ICMPInterface.typeLabels[icmpmsg.type] + "/n");
+					Principal.addReceived(" tipo no implementado. Etiqueta: " + ICMPInterface.typeLabels[icmpmsg.type] + "/n");
 				} catch (Exception e) {
 				}
 				return false; // No se proceso el paquete como un paquete ICMP,
@@ -217,6 +240,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			*/
 			case ICMP.DESTINATION_UNREACHABLE: {
 				System.out.println("Envio de mensaje ICMP DESTINATION_UNREACHABLE, tipo " + type + " código " + code + " direccion " + dest.toString());
+				Principal.addSended("Envio de mensaje ICMP DESTINATION_UNREACHABLE, tipo " + type + " código " + code + " direccion " + dest.toString() + "\n");
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
@@ -230,6 +254,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMP.SOURCE_QUENCH: {
 				System.out.println("Envio de mensaje ICMP SOURCE_QUENCH, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP SOURCE_QUENCH, tipo " + type + " código " + code + "\n");
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
@@ -243,6 +268,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMP.REDIRECT: {
 				System.out.println("Envio de mensaje ICMP REDIRECT, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP REDIRECT, tipo " + type + " código " + code + "\n");
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
@@ -258,6 +284,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMP.ECHO_REQUEST: {
 				System.out.println("Envio de mensaje ICMP ECHO_REQUEST, tipo " + type + " código " + code + " direccion destino " + dest.toString());
+				Principal.addSended("Envio de mensaje ICMP ECHO_REQUEST, tipo " + type + " código " + code + " direccion destino " + dest.toString() + "\n");
 				ping(dest);
 			}
 				;
@@ -265,6 +292,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMP.ROUTER_ADVERT: {
 				System.out.println("Envio de mensaje ICMP ROUTER_ADVERT, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP ROUTER_ADVERT, tipo " + type + " código " + code + "\n");
 				//Falta implementacion
 			}
 				;
@@ -272,6 +300,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMP.ROUTER_SOLICIT: {
 				System.out.println("Envio de mensaje ICMP ROUTER_SOLICIT, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP ROUTER_SOLICIT, tipo " + type + " código " + code + "\n");
 				//Falta implementacion
 			}
 				;
@@ -279,6 +308,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	
 			case ICMP.TIME_EXCEEDED: {
 				System.out.println("Envio de mensaje ICMP TIME_EXCEEDED, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP TIME_EXCEEDED, tipo " + type + " código " + code + "\n");
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
@@ -292,6 +322,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 
 			case ICMP.TIMESTAMP: {
 				System.out.println("Envio de mensaje ICMP TIMESTAMP, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP TIMESTAMP, tipo " + type + " código " + code + "\n");
 				icmpp.data = new byte[20];
 				icmpp.type = type;
 				icmpp.code = code;
@@ -336,6 +367,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				
 			case ICMP.INFORMATION_REQUEST: {
 				System.out.println("Envio de mensaje ICMP INFORMATION_REQUEST, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP INFORMATION_REQUEST, tipo " + type + " código " + code + "\n");
 				icmpp.data = new byte[8];
 				icmpp.type = type;
 				icmpp.code = code;
@@ -367,12 +399,12 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			default: {
 				System.out
 						.println("El envio de mensaje ICMP fallo. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
+				Principal.addSended("El envio de mensaje ICMP fallo. No se encontro el tipo de mensaje. Tipo " + type + " código " + code + "\n");
 				return;
 			}
 		}
 		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
 		if (type != ICMP.ECHO_REQUEST) {
-			
 			Datagram datagram = new Datagram(data.getVersion(), data.getHeaderLength(), data.getPrecedence(), data.isDelay(), data.isThroughput(), 
 					data.isReliability(), data.isCost(), data.isFlags_nousado(), data.getTotalLength(), data.getDatagramId(), data.isFlags_nousado(), 
 					data.isFlags_ultfrag(), data.isFlags_fragm(), data.getFragOffset(), data.getTtl(), 1, data.getChecksum(), 
@@ -397,6 +429,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		switch (type) {
 			case ICMP.PARAMETER_PROBLEM: {
 				System.out.println("Envio de mensaje ICMP PARAMETER_PROBLEM, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP PARAMETER_PROBLEM, tipo " + type + " código " + code + "\n");
 				icmpp.data = new byte[36];
 				icmpp.type = type;
 				icmpp.code = code;
@@ -411,6 +444,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			default: {
 				System.out
 						.println("El envio de mensaje ICMP fallo. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
+				Principal.addSended("El envio de mensaje ICMP fallo. No se encontro el tipo de mensaje. Tipo " + type + " código " + code + "\n");
 				return;
 			}
 		}
@@ -446,12 +480,14 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			datagram.genChecksum();
 			System.out
 			.println("Ping a " + dest.toString());
+			Principal.addSended("Ping a " + dest.toString() + "\n");
 			
 			eventoN3 evReq = new eventoN3(eventoN3.SEND, datagram.toByte());
 			ip.addLoc(evReq);
 		} catch (Exception e) {
 			System.out
 					.println("Error en la generacion y envio de ECHO REQUEST. Posible ruta no encontrada.");
+			Principal.addSended("Error en la generacion y envio de ECHO REQUEST. Posible ruta no encontrada.\n");
 		}
 	}
 
@@ -467,6 +503,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 
 	public void receive_loc(eventoN3 pack) {
 		System.out.println("Encontro requerimiento ICMP en cola local");
+		Principal.addSended("Encontro requerimiento ICMP en cola local\n");
 		// Segun la primitiva recibida, toma la accion que corresponda
 		int opcion = pack.getControl();
 		// Ver que es lo que hace esto porq no hace nada...
@@ -475,6 +512,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		case eventoN3.SEND: // Recibe info para enviar
 			// aca se debria ver el nexthop, la interfaz, mtu, fragmentar, etc
 			System.out.println("ICMP envía la informacion de la cola");
+			Principal.addSended("ICMP envía la informacion de la cola\n");
 			ICMPPacketSend infoSend = (ICMPPacketSend) pack.getInfo();
 			if (infoSend.getType() == PARAMETER_PROBLEM)
 				send(infoSend.getType(), infoSend.getCode(), (byte)0x05 /*Valor seteado segun el octeto del problema*/,
@@ -486,6 +524,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		default:
 			System.out
 			.println("El tipo del requerimiento recibido localmente no es 'informacion a enviar'. TIPO ERRONEO");
+		Principal.addSended("El tipo del requerimiento recibido localmente no es 'informacion a enviar'. TIPO ERRONEO\n");
 			break;
 		}
 	}
@@ -498,8 +537,8 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	public void receive_rem(eventoN3 indN2) {
 		int opcion = indN2.getControl();
 		System.out
-				.println("Encontro requerimiento en cola remota de ICMP tipo "
-						+ opcion);
+				.println("Encontro requerimiento en cola remota de ICMP");
+		Principal.addReceived("Encontro requerimiento en cola remota de ICMP\n");
 		// Segun la primitiva recibida, toma la accion que corresponda
 		switch (opcion) {
 		case eventoN3.INFO_RECEIVED: // Recepcion de un frame link layer con
@@ -509,6 +548,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		default:
 			System.out
 			.println("El tipo del requerimiento recibido remotamente no es 'informacion recibida'. TIPO ERRONEO");
+		Principal.addReceived("El tipo del requerimiento recibido remotamente no es 'informacion recibida'. TIPO ERRONEO\n");
 			break;
 		}
 	}

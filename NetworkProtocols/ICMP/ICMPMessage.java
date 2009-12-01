@@ -3,6 +3,7 @@ package NetworkProtocols.ICMP;
 import java.io.*;
 
 import Exceptions.MalformedPacketException;
+import Forms.Principal;
 import NetworkProtocols.*;
 import NetworkProtocols.IP.Datagram;
 import NetworkProtocols.IP.Address.IpAddress;
@@ -58,8 +59,8 @@ class ICMPMessage implements ICMPInterface {
 	}
 
 	private void parse() throws MalformedPacketException {
-		//if (validChecksum() == false)
-		//	throw new MalformedPacketException();
+		if (validChecksum() == false)
+			throw new MalformedPacketException();
 		DataInputStream ds = new DataInputStream(new ByteArrayInputStream(data,
 				0, 4));
 		try {
@@ -282,6 +283,7 @@ class ICMPMessage implements ICMPInterface {
 				default: {
 					System.out
 							.println("No se pudo crear el mensaje. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
+					Principal.addReceived("No se pudo crear el mensaje. No se encontro el tipo de mensaje. Tipo " + type + " código " + code + "\n");
 					return;
 				}
 			}
@@ -430,6 +432,7 @@ class ICMPMessage implements ICMPInterface {
 			default: {
 				System.out
 						.println("No se pudo crear el mensaje. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
+				Principal.addReceived("No se pudo crear el mensaje. No se encontro el tipo de mensaje. Tipo " + type + " código " + code + "\n");
 				return;
 			}
 			
@@ -456,6 +459,11 @@ class ICMPMessage implements ICMPInterface {
 			break;
 			case TIMESTAMP:
 				rep = new ICMPMessage();
+				rep.marcaTiempoRecepcion = new byte[4];
+				Long m = System.currentTimeMillis();
+				for(int i= 0; i < 4; i++){  
+					rep.marcaTiempoRecepcion[3 - i] = (byte)(m >>> (i * 8));  
+				}  
 				rep.data = new byte[data.length];
 				rep.type = TIMESTAMP_REPLY;
 				rep.code = code;
@@ -469,11 +477,10 @@ class ICMPMessage implements ICMPInterface {
 				for(int i= 0; i < 4; i++){  
 					rep.marcaTiempoOrigen[i] = marcaTiempoOrigen[i];  
 				}  
-				rep.marcaTiempoRecepcion = new byte[4];
-				Long m = System.currentTimeMillis();
-				for(int i= 0; i < 4; i++){  
-					rep.marcaTiempoRecepcion[3 - i] = (byte)(m >>> (i * 8));  
-				}  
+				try {
+					Thread.sleep((int)(Math.random() * 200));
+				} catch (InterruptedException e) {
+				}
 				m = System.currentTimeMillis();
 				rep.marcaTiempoTransmision = new byte[4];
 				for(int i= 0; i < 4; i++){  
@@ -504,113 +511,87 @@ class ICMPMessage implements ICMPInterface {
 		String msg = new String("Type: " + type + " ");
 		switch (type) {
 		case ECHO_REQUEST:
-			msg = msg.concat("ECHO_REQUEST");
+			msg = msg.concat("(ECHO_REQUEST)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 		case ECHO_REPLY:
-			msg = msg.concat("ECHO_REPLY");
+			msg = msg.concat("(ECHO_REPLY)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 		case ICMP.DESTINATION_UNREACHABLE: 
-			msg = msg.concat("DESTINATION_UNREACHABLE");
-			switch (code){
-			case 0:
-				msg = msg.concat("  -  Codigo: " + code + " (Red inaccesible) ");
-				break;
-			case 1:
-				msg = msg.concat("  -  Codigo: " + code + " (Host inaccesible) ");
-				break;
-			case 2:
-				msg = msg.concat("  -  Codigo: " + code + " (Protocolo inaccesible) ");
-				break;
-			case 3:
-				msg = msg.concat("  -  Codigo: " + code + " (Puerto inaccesible) ");
-				break;
-			case 4:
-				msg = msg.concat("  -  Codigo: " + code + " (Se necesitaba fragmentacion pero DF estaba activado) ");
-				break;
-			case 5:
-				msg = msg.concat("  -  Codigo: " + code + " (Fallo en la ruta de origen) ");
-				break;
-			default:
-				msg = msg.concat("  -  Codigo: " + code + " ");	
-				break;
-		}
+			msg = msg.concat("(DESTINATION_UNREACHABLE)");
+			try{
+				msg = msg.concat("  -  Codigo: " + code + " ("+ unreachableLabels[code] +") ");
+			} catch (Exception e){
+				msg = msg.concat("  -  Codigo: " + code + " (tipo desconocido) ");
+			}
 			break;
 
 		case ICMP.SOURCE_QUENCH: 
-			msg = msg.concat("SOURCE_QUENCH");
+			msg = msg.concat("(SOURCE_QUENCH)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.REDIRECT: 
-			msg = msg.concat("REDIRECT");
-			switch (code){
-				case 0:
-					msg = msg.concat("  -  Codigo: " + code + " (Redirigir datagramas debido a la red) ");
-					break;
-				case 1:
-					msg = msg.concat("  -  Codigo: " + code + " (Redirigir datagramas debido al host) ");
-					break;
-				case 2:
-					msg = msg.concat("  -  Codigo: " + code + " (Redirigir datagramas debido al tipo de servicio y la red) ");
-					break;
-				case 3:
-					msg = msg.concat("  -  Codigo: " + code + " (Redirigir datagramas debido al tipo de servicio y al host) ");
-					break;
-				default:
-					msg = msg.concat("  -  Codigo: " + code + " ");	
-					break;
+			msg = msg.concat("(REDIRECT)");
+			try{
+				msg = msg.concat("  -  Codigo: " + code + " ("+ redirectLabels[code] +") ");
+			} catch (Exception e){
+				msg = msg.concat("  -  Codigo: " + code + " (tipo desconocido) ");
 			}
 			break;
 
 		case ICMP.ROUTER_ADVERT: 
-			msg = msg.concat("ROUTER_ADVERT");
+			msg = msg.concat("(ROUTER_ADVERT)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.ROUTER_SOLICIT: 
-			msg = msg.concat("ROUTER_SOLICIT");
+			msg = msg.concat("(ROUTER_SOLICIT)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.TIME_EXCEEDED: 
-			msg = msg.concat("TIME_EXCEEDED");
-			switch (code){
-				case 0:
-					msg = msg.concat("  -  Codigo: " + code + " (Tiempo de vida superado en transito) ");
-					break;
-				case 1:
-					msg = msg.concat("  -  Codigo: " + code + " (Tiempo de reensamblaje de fragmentos superado) ");
-					break;
-				default:
-					msg = msg.concat("  -  Codigo: " + code + " ");	
-					break;
-			}	
+			msg = msg.concat("(TIME_EXCEEDED)");
+			try{
+				msg = msg.concat("  -  Codigo: " + code + " ("+ timeExceededLabels[code] +") ");
+			} catch (Exception e){
+				msg = msg.concat("  -  Codigo: " + code + " (tipo desconocido) ");
+			}
 			break;
 
 		case ICMP.PARAMETER_PROBLEM: 
-			msg = msg.concat("PARAMETER_PROBLEM");
+			msg = msg.concat("(PARAMETER_PROBLEM)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.TIMESTAMP: 
-			msg = msg.concat("TIMESTAMP_REQUEST");
+			msg = msg.concat("(TIMESTAMP_REQUEST)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
+			msg = msg.concat("\nIdentificador: " + toByteValueString(identificador));
+			msg = msg.concat(" nroSecuencia: " + toByteValueString(nroSecuencia));
+			msg = msg.concat(" marcaTiempoOrigen: " + toByteValueString(marcaTiempoOrigen));
+			msg = msg.concat(" marcaTiempoRecepcion: " + toByteValueString(marcaTiempoRecepcion));
+			msg = msg.concat(" marcaTiempoTransmision: " + toByteValueString(marcaTiempoTransmision));
 			break;
 
 		case ICMP.TIMESTAMP_REPLY: 
-			msg = msg.concat("TIMESTAMP_REPLY");
+			msg = msg.concat("(TIMESTAMP_REPLY)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
+			msg = msg.concat("\nIdentificador: " + toByteValueString(identificador));
+			msg = msg.concat(" nroSecuencia: " + toByteValueString(nroSecuencia));
+			msg = msg.concat(" marcaTiempoOrigen: " + toByteValueString(marcaTiempoOrigen));
+			msg = msg.concat(" marcaTiempoRecepcion: " + toByteValueString(marcaTiempoRecepcion));
+			msg = msg.concat(" marcaTiempoTransmision: " + toByteValueString(marcaTiempoTransmision));
 			break;
 
 		case ICMP.INFORMATION_REQUEST: 
-			msg = msg.concat("INFORMATION_REQUEST");
+			msg = msg.concat("(INFORMATION_REQUEST)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
 		case ICMP.INFORMATION_REPLY: 
-			msg = msg.concat("INFORMATION_REPLY");
+			msg = msg.concat("(INFORMATION_REPLY)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
 			break;
 
@@ -642,8 +623,22 @@ class ICMPMessage implements ICMPInterface {
 	}
 
 	private boolean validChecksum(){
-		DataInputStream ds = new DataInputStream(new ByteArrayInputStream(data,
-				0, data.length));
+		byte[] auxData = new byte[data.length];
+		System.arraycopy(data, 0, auxData, 0, data.length);
+		DataInputStream ds = null;
+		int sumAct;
+		ds = new DataInputStream(new ByteArrayInputStream(auxData,
+				2, 4));
+		try {
+			sumAct = (int)ds.readUnsignedShort();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		auxData[2] = 0x00;
+		auxData[3] = 0x00;
+		ds = new DataInputStream(new ByteArrayInputStream(auxData,
+				0, auxData.length));
 		int sum = 0;
 		boolean theEnd = false;
 		while (!theEnd) {
@@ -658,15 +653,6 @@ class ICMPMessage implements ICMPInterface {
 		sum = (sum >> 16) + (sum & 0xffff);
 		sum += (sum >> 16);
 		int res = (~sum & 0xffff);
-		int sumAct;
-		ds = new DataInputStream(new ByteArrayInputStream(data,
-				2, 4));
-		try {
-			sumAct = (int)ds.readUnsignedShort();
-		} catch (IOException e) {
-			e.printStackTrace();
-			sumAct = -1;
-		}
 		if (sumAct == res)
 			return true;
 		else

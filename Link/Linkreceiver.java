@@ -35,7 +35,7 @@ public class Linkreceiver extends Thread {
 				byte[] bb = new byte[dgpacket.getLength()];
 				System.arraycopy(buff, 0, bb, 0, dgpacket.getLength());
 				// aca entregar frame al Link, que lo entrega a la interfaz
-				System.out.println("LINK recibe  " + bb);
+				System.out.println("LINK recibe  " + toByteValueString(bb));
 
 				lnk.receive(bb);
 				// System.out.println("   R<-- (" );
@@ -53,6 +53,13 @@ public class Linkreceiver extends Thread {
 			// aca mandar la exception
 		}
 		// System.out.println("DCCPreceiver thread finished.");
+	}
+
+	public String toByteValueString(byte[] val){
+		String ret = new String();
+		for (int i = 0; i < val.length; i++)
+			ret = ret.concat(String.format("%X", val[i]).toUpperCase());
+		return ret;
 	}
 
 	public void close() throws IOException {

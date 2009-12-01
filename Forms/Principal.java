@@ -11,16 +11,10 @@
 
 package Forms;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.PrintWriter;
 
-import Exceptions.AddressException;
 import NetworkProtocols.eventoN3;
 import NetworkProtocols.IP.Datagram;
-import NetworkProtocols.IP.DatagramPool;
-import NetworkProtocols.IP.FragAssembler;
-import NetworkProtocols.IP.Address.IpAddress;
 import Utils.ApplicationInterface;
 import Utils.BinaryManipulator;
 
@@ -188,7 +182,7 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
         txtConsolaEnvio.setColumns(20);
         txtConsolaEnvio.setFont(new java.awt.Font("Monospaced", 0, 12));
         txtConsolaEnvio.setRows(5);
-        txtConsolaEnvio.setEnabled(false);
+        txtConsolaEnvio.setEnabled(true);
         txtConsolaEnvio.setFocusable(false);
         jScrollPane2.setViewportView(txtConsolaEnvio);
 
@@ -220,7 +214,7 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
         txtConsolaRecepcion.setColumns(20);
         txtConsolaRecepcion.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         txtConsolaRecepcion.setRows(5);
-        txtConsolaRecepcion.setEnabled(false);
+        txtConsolaRecepcion.setEnabled(true);
         txtConsolaRecepcion.setFocusable(false);
         jScrollPane3.setViewportView(txtConsolaRecepcion);
 
@@ -274,7 +268,7 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
     private void cmdEnviarTextoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnviarTextoActionPerformed
 		byte[] message1 = this.txtTextoAEnviar.getText().getBytes();
 		Datagram d1 = new Datagram(message1.length);
-		d1.setDestAddress(conf.getAddrDstSimulada()); //La direccion origen del datagram original es la destino de este
+		d1.setDestAddress(conf.getAddrDstSimulada()); 
 		d1.setsourceAddress(conf.getIP().getLocalIpAddress());
 		d1.setProtocol(6); //TCP, tomado en este caso como aplicacion
 		d1.setData(message1, true);
@@ -285,14 +279,19 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
 
     private void cmdEnviarArchivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnviarArchivoActionPerformed
 		byte[] message1 = BinaryManipulator.readByteArray(this.txtArchivoAEnviar.getText());
-		Datagram d1 = new Datagram(message1.length);
-		d1.setDestAddress(conf.getAddrDstSimulada()); //La direccion origen del datagram original es la destino de este
-		d1.setsourceAddress(conf.getIP().getLocalIpAddress());
-		d1.setProtocol(6); //TCP, tomado en este caso como aplicacion
-		d1.setData(message1, true);
-		d1.genChecksum();
-		eventoN3 evReq = new eventoN3(eventoN3.SEND, d1);
-		conf.getIP().addLoc(evReq);
+		if (message1 != null){
+			Datagram d1 = new Datagram(message1.length);
+			d1.setDestAddress(conf.getAddrDstSimulada()); 
+			d1.setsourceAddress(conf.getIP().getLocalIpAddress());
+			d1.setProtocol(6); //TCP, tomado en este caso como aplicacion
+			d1.setData(message1, true);
+			d1.genChecksum();
+			eventoN3 evReq = new eventoN3(eventoN3.SEND, d1);
+			conf.getIP().addLoc(evReq);
+		}
+		else {
+			System.out.println("Archivo no encontrado");
+		}
     }//GEN-LAST:event_cmdEnviarArchivoActionPerformed
 
     private void cmdEnviarPaqueteICMPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnviarPaqueteICMPActionPerformed
@@ -338,7 +337,10 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
 	@Override
 	public void receiveMessage(Object o) {
 		byte receive[] = (byte[])o;
-		System.out.println("Datos recibidos: " + toByteValueString(receive));
+		System.out.println("Datos recibidos (Bytes): " + toByteValueString(receive));
+		addReceived("Datos recibidos (Bytes): " + toByteValueString(receive) + "\n");
+		System.out.println("Datos recibidos (String): " + new String(receive));
+		addReceived("Datos recibidos (String): " + new String(receive) + "\n");
 	}
     
 	public String toByteValueString(byte[] val){
@@ -348,7 +350,13 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
 		return ret;
 	}
 
-    
+    public static void addSended(String txt){
+    	txtConsolaEnvio.append(txt); 
+    }
+
+    public static void addReceived(String txt){
+    	txtConsolaRecepcion.append(txt);
+    }
     
     /**
     * @param args the command line arguments
@@ -379,8 +387,8 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
     private javax.swing.JPanel panlConsolaEnvio;
     private javax.swing.JTextField txtArchivoAEnviar;
     private javax.swing.JComboBox txtCodigoICMP;
-    private javax.swing.JTextArea txtConsolaEnvio;
-    private javax.swing.JTextArea txtConsolaRecepcion;
+    private static javax.swing.JTextArea txtConsolaEnvio;
+    private static javax.swing.JTextArea txtConsolaRecepcion;
     private javax.swing.JTextField txtTextoAEnviar;
     private javax.swing.JComboBox txtTipoICMP;
     // End of variables declaration//GEN-END:variables
