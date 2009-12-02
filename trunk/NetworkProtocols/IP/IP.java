@@ -38,6 +38,7 @@ public class IP implements ProtocolInterface {
 	IpAddress localAddress = null;
 	private DatagramPool datagramPool = new DatagramPool();
 	private ApplicationInterface app = null;
+	private Mask mask;
 	
 	public IP(Interfaces ifs) throws NodeException {
 		buffRem = new Queue(); // Instanciacion del buffer de recepcion de
@@ -134,39 +135,41 @@ public class IP implements ProtocolInterface {
 			
 			
 			if (this.localAddress.equals(dd.getDestAddress())) {
-				// envío local, detiene el datagram hasta recibir todos los
-				// fragmentos (si es fragmento)
-				// Mensajes ICMP posibles: Tiempo superado (Tiempo de
-				// reensamblaje de fragmentos superado)
-				// una vez que se tiene el datagram completo, se pasa al
-				// nivel superior
-				
-				System.out.println("dd: "
-						+ dd);
-
-				Datagram assembled = datagramPool.addDatagram(dd);
-				
-				System.out.println("Envio local para IP: "
-						+ dd.getDestAddress().toString());
-				Principal.addReceived("Envio local para IP: " + dd.getDestAddress().toString() + "\n");
-				// local_delivery(dd)
-				System.out.println("assembled: "
-						+ assembled);
-				System.out.println("dd.getProtocol(): "
-						+ dd.getProtocol());
-				if (assembled != null && dd.getProtocol() == 1) { // Si el protocolo es 1
-												// entonces es un paquete
-												// ICMP
-					System.out.println("Recepcion de un mensaje ICMP.");
-					Principal.addReceived("Recepcion de un mensaje ICMP\n");
-					icmp.addRem(new eventoN3(eventoN3.INFO_RECEIVED, assembled)); // .handle(indN2);
-					return;
+				if (validAddress(dd.getSourceAddress())){
+					// envío local, detiene el datagram hasta recibir todos los
+					// fragmentos (si es fragmento)
+					// Mensajes ICMP posibles: Tiempo superado (Tiempo de
+					// reensamblaje de fragmentos superado)
+					// una vez que se tiene el datagram completo, se pasa al
+					// nivel superior
+					
+					System.out.println("dd: "
+							+ dd);
+	
+					Datagram assembled = datagramPool.addDatagram(dd);
+					
+					System.out.println("Envio local para IP: "
+							+ dd.getDestAddress().toString());
+					Principal.addReceived("Envio local para IP: " + dd.getDestAddress().toString() + "\n");
+					// local_delivery(dd)
+					System.out.println("assembled: "
+							+ assembled);
+					System.out.println("dd.getProtocol(): "
+							+ dd.getProtocol());
+					if (assembled != null && dd.getProtocol() == 1) { // Si el protocolo es 1
+													// entonces es un paquete
+													// ICMP
+						System.out.println("Recepcion de un mensaje ICMP.");
+						Principal.addReceived("Recepcion de un mensaje ICMP\n");
+						icmp.addRem(new eventoN3(eventoN3.INFO_RECEIVED, assembled)); // .handle(indN2);
+						return;
+					}
+					if (assembled != null && dd.getProtocol() == 6) {//Si es TCP
+						if (this.app != null)
+							app.receiveMessage(assembled.getMessage());
+					}
+					break;
 				}
-				if (assembled != null && dd.getProtocol() == 6) {//Si es TCP
-					if (this.app != null)
-						app.receiveMessage(assembled.getMessage());
-				}
-				break;
 			}
 			
 			
@@ -349,6 +352,16 @@ public class IP implements ProtocolInterface {
 		}
 	}
 
+	private boolean validAddress(IpAddress src){
+		byte[] msk = mask.getBytesMask();
+		byte[] d1 = src.toByte();
+		byte[] d2 = localAddress.toByte();
+		for (int i =0; i < 4; i++)
+			if ((d1[i] & msk[i]) != (d2[i] & msk[i]))
+				return false;
+		return true;
+	}
+	
 	// Procesa un requerimiento de envio u otro del nivel superior. Recibe en un
 	// byte la info de
 	// control de l ainterfa, y un objeto conteniendo la idu
@@ -489,6 +502,9 @@ public class IP implements ProtocolInterface {
 		return icmp;
 	}
 	
+	public Mask getNetMask(){
+		return mask;
+	}
 
 
 	// Agregado de una entrada a la tabla de ruteo. Este metodo se invocaria
@@ -506,6 +522,7 @@ public class IP implements ProtocolInterface {
 	public void addRoute(IpAddress dstNet, Mask mask, boolean routeType,
 			IpAddress nextHop, Interface ifc) {
 		rTable.addEntry(dstNet, mask, routeType, nextHop, ifc);
+		this.mask = mask;
 	}
 
 	public void rt() {

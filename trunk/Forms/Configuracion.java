@@ -28,6 +28,7 @@ import NetworkProtocols.IP.Address.Mask;
  */
 public class Configuracion extends javax.swing.JFrame {
 	private static final long serialVersionUID = 4090957822834807053L;
+	@SuppressWarnings("unused")
 	private static IpAddress addr1 = null;
 	private static IpAddress addrDstSimulada = null;
 	private static IpAddress addrSrcSimulada = null;

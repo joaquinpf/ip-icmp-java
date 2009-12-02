@@ -8,8 +8,8 @@ public interface ICMPInterface {
 			SOURCE_QUENCH = 4, REDIRECT = 5, ECHO_REQUEST = 8,
 			ROUTER_ADVERT = 9, ROUTER_SOLICIT = 10, TIME_EXCEEDED = 11,
 			PARAMETER_PROBLEM = 12, TIMESTAMP = 13, TIMESTAMP_REPLY = 14,
-			INFORMATION_REQUEST = 15, INFORMATION_REPLY = 16;
-	// Faltan 17 y 18
+			INFORMATION_REQUEST = 15, INFORMATION_REPLY = 16, 
+			ADDRESS_MASK_REQUEST = 17, ADDRESS_MASK_REPLY = 18;
 	/**
 	 * Etiquetas asociadas a los tipos de mensajes ICMP.
 	 */
@@ -18,7 +18,8 @@ public interface ICMPInterface {
 			"Destination Unreachable", "Source Quench", "Redirect", "", "",
 			"Echo Request", "Router Advertisment", "Router Solicitation",
 			"Time Exceeded", "Parameter Problem", "Timestamp Request",
-			"Timestamp Reply", "Information Request", "Information Reply" };
+			"Timestamp Reply", "Information Request", "Information Reply", 
+			"Address Mask Request", "Address Mask Reply" };
 
 	/**
 	 * Codigos asociados con Destino Inalcanzable
@@ -34,7 +35,13 @@ public interface ICMPInterface {
 
 	public static String[] unreachableLabels = { "Network Unreachable",
 			"Host Unreachable", "Protocol Unreachable", "Port Unreachable",
-			"Fragmentation necessary but DF bit set", "Source Route failed" };
+			"Fragmentation necessary but DF bit set", "Source Route failed",
+			"Destination Network Unknown", "Destination Host Unknown", 
+			"Source Host Isolated", "Destination Network Administratively Prohibited", 
+			"Destination Host Administratively Prohibited", "Network Unreachable For This Type Of Service", 
+			"Host Unreachable For This Type Of Service", 
+			"Communication Administratively Prohibited By Filtering", 
+			"Host Precedence Violation", "Precedence Cutoff In Effect"};
 	// VER QUE FALTAN DEL 6 AL 15
 	/**
 	 * Codigos asociados con Redireccion de paquetes

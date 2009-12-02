@@ -196,7 +196,6 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 							.println("Error en la generacion y envio de INFORMATION REPLY. Posible ruta no encontrada.");
 					Principal.addSended("Error en la generacion y envio de INFORMATION REPLY. Posible ruta no encontrada.\n");
 				}
-
 			}
 				;
 				break;
@@ -207,7 +206,40 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			}
 				;
 				break;
+
+			case ICMPMessage.ADDRESS_MASK_REQUEST: {
+				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
+				ICMPMessage rp = icmpmsg.reply();
+				System.out.println("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString());
+				Principal.addSended("Se generó respuesta ICMP y se procederá al envio del mensaje: " + rp.toString() + "\n");
+				try {
+					Datagram datagram = new Datagram((byte[]) ((Datagram)p.getInfo()).toByte());
+					IpAddress auxSrc = datagram.getSourceAddress();
+					datagram.setsourceAddress(datagram.getDestAddress());
+					datagram.setDestAddress(auxSrc);
+					datagram.setData(rp.toByteArray());
+					// El resto de los campos teoricamente los completa IP antes de
+					// mandar el datagram.
+					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
+					ip.addLoc(evReply);
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.out
+							.println("Error en la generacion y envio de ADDRESS MASK REPLY. Posible ruta no encontrada.");
+					Principal.addSended("Error en la generacion y envio de ADDRESS MASK REPLY. Posible ruta no encontrada.\n");
+				}
+			}
+				;
+				break;
 	
+			case ICMPMessage.ADDRESS_MASK_REPLY: {
+				System.out.println("Paquete ICMP: " + icmpmsg.toString());
+				Principal.addReceived("Paquete ICMP: " + icmpmsg.toString() + "\n");
+			}
+				;
+				break;
+
 			default: {
 				System.out.print("El codigo del paquete ICMP no es válido. Tipo: "
 						+ icmpmsg.type);
@@ -380,6 +412,28 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			}
 				;
 				break;
+
+			case ICMP.ADDRESS_MASK_REQUEST: {
+				System.out.println("Envio de mensaje ICMP ADDRESS_MASK_REQUEST, tipo " + type + " código " + code);
+				Principal.addSended("Envio de mensaje ICMP ADDRESS_MASK_REQUEST, tipo " + type + " código " + code + "\n");
+				icmpp.data = new byte[12];
+				icmpp.type = type;
+				icmpp.code = code;
+				icmpp.identificador = new byte[2];
+				icmpp.nroSecuencia = new byte[2];
+				icmpp.identificador[0] = 0x00;
+				icmpp.identificador[1] = 0x00;
+				icmpp.nroSecuencia[0] = 0x00;
+				icmpp.nroSecuencia[1] = 0x00;
+				icmpp.subnetAddressMask = new byte[4];
+				icmpp.subnetAddressMask[0] = 0x00;
+				icmpp.subnetAddressMask[1] = 0x00;
+				icmpp.subnetAddressMask[2] = 0x00;
+				icmpp.subnetAddressMask[3] = 0x00;
+			}
+				;
+				break;
+
 			case ICMP.PARAMETER_PROBLEM: {
 				send(type, code, (byte)0x01, data);
 			}

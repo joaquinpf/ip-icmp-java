@@ -129,4 +129,8 @@ public class Interface {
 	public void setMTU(Integer mTU) {
 		MTU = mTU;
 	}
+	
+	public Mask getMask(){
+		return netMask;
+	}
 }

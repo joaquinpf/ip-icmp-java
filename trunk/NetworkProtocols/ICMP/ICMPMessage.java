@@ -6,6 +6,7 @@ import Exceptions.MalformedPacketException;
 import Forms.Principal;
 import NetworkProtocols.*;
 import NetworkProtocols.IP.Datagram;
+import NetworkProtocols.IP.IP;
 import NetworkProtocols.IP.Address.IpAddress;
 
 class ICMPMessage implements ICMPInterface {
@@ -36,6 +37,7 @@ class ICMPMessage implements ICMPInterface {
 	byte[] marcaTiempoTransmision; // 4 bytes
 	byte[] direccionIpGateway; // 4 bytes
 	byte[] datosEcho; // 20 bytes
+	byte[] subnetAddressMask; //4bytes
 	
 	IpAddress src = null;
 	
@@ -279,6 +281,42 @@ class ICMPMessage implements ICMPInterface {
 				}
 					;
 					break;
+				case ICMP.ADDRESS_MASK_REQUEST: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 12));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					identificador = new byte[2];
+					for (int i = 0; i < 2; i++)
+						identificador[i] = (byte)ds.readUnsignedByte();
+					nroSecuencia = new byte[2];
+					for (int i = 0; i < 2; i++)
+						nroSecuencia[i] = (byte)ds.readUnsignedByte();
+					subnetAddressMask = new byte[4];
+					for (int i = 0; i < 4; i++)
+						subnetAddressMask[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
+				case ICMP.ADDRESS_MASK_REPLY: {
+					ds = new DataInputStream(new ByteArrayInputStream(data,
+							0, 12));
+					ds.readUnsignedByte();
+					ds.readUnsignedByte();
+					ds.readUnsignedShort();
+					identificador = new byte[2];
+					for (int i = 0; i < 2; i++)
+						identificador[i] = (byte)ds.readUnsignedByte();
+					nroSecuencia = new byte[2];
+					for (int i = 0; i < 2; i++)
+						nroSecuencia[i] = (byte)ds.readUnsignedByte();
+					subnetAddressMask = new byte[4];
+					for (int i = 0; i < 4; i++)
+						subnetAddressMask[i] = (byte)ds.readUnsignedByte();
+				}
+					;
+					break;
 		
 				default: {
 					System.out
@@ -354,13 +392,13 @@ class ICMPMessage implements ICMPInterface {
 				break;
 	
 			case ICMP.ROUTER_ADVERT: {
-				//Mirar porq falta el detalle del mensaje
+				//Este mensaje no esta implementado debido a q es opcional
 			}
 				;
 				break;
 	
 			case ICMP.ROUTER_SOLICIT: {
-				//Mirar porq falta el detalle del mensaje
+				//Este mensaje no esta implementado debido a q es opcional
 			}
 				;
 				break;
@@ -429,6 +467,32 @@ class ICMPMessage implements ICMPInterface {
 				;
 				break;
 	
+			case ICMP.ADDRESS_MASK_REQUEST: {
+				data[4] = identificador[0];
+				data[5] = identificador[1];
+				data[6] = nroSecuencia[0];
+				data[7] = nroSecuencia[1];
+				data[8] = subnetAddressMask[0];
+				data[9] = subnetAddressMask[1];
+				data[10] = subnetAddressMask[2];
+				data[11] = subnetAddressMask[3];
+			}
+				;
+				break;
+
+			case ICMP.ADDRESS_MASK_REPLY: {
+				data[4] = identificador[0];
+				data[5] = identificador[1];
+				data[6] = nroSecuencia[0];
+				data[7] = nroSecuencia[1];
+				data[8] = subnetAddressMask[0];
+				data[9] = subnetAddressMask[1];
+				data[10] = subnetAddressMask[2];
+				data[11] = subnetAddressMask[3];
+			}
+				;
+				break;
+
 			default: {
 				System.out
 						.println("No se pudo crear el mensaje. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
@@ -499,6 +563,20 @@ class ICMPMessage implements ICMPInterface {
 				rep.identificador[1] = identificador[1];
 				rep.nroSecuencia[0] = nroSecuencia[0];
 				rep.nroSecuencia[1] = nroSecuencia[1];
+				rep.update();
+			break;
+			case ADDRESS_MASK_REQUEST:
+				rep = new ICMPMessage();
+				rep.data = new byte[data.length];
+				rep.type = ADDRESS_MASK_REPLY;
+				rep.code = code;
+				rep.identificador = new byte[2];
+				rep.nroSecuencia = new byte[2];
+				rep.identificador[0] = identificador[0];
+				rep.identificador[1] = identificador[1];
+				rep.nroSecuencia[0] = nroSecuencia[0];
+				rep.nroSecuencia[1] = nroSecuencia[1];
+				rep.subnetAddressMask = ((IP)NetworkProtocols.getProtocol(NetworkProtocols.PROTO_IP)).getNetMask().getBytesMask();
 				rep.update();
 			break;
 			default:
@@ -593,6 +671,17 @@ class ICMPMessage implements ICMPInterface {
 		case ICMP.INFORMATION_REPLY: 
 			msg = msg.concat("(INFORMATION_REPLY)");
 			msg = msg.concat("  -  Codigo: " + code + " ");
+			break;
+
+		case ICMP.ADDRESS_MASK_REQUEST: 
+			msg = msg.concat("(ADDRESS_MASK_REQUEST)");
+			msg = msg.concat("  -  Codigo: " + code + " ");
+			break;
+
+		case ICMP.ADDRESS_MASK_REPLY: 
+			msg = msg.concat("(ADDRESS_MASK_REPLY)");
+			msg = msg.concat("  -  Codigo: " + code + " ");
+			msg = msg.concat("\nMascara: " + toByteValueString(subnetAddressMask));
 			break;
 
 		default: 
