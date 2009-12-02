@@ -49,4 +49,14 @@ public class Mask {
 		String yy = y1 + "." + y2 + "." + y3 + "." + y4;
 		return yy;
 	}
+	
+	public byte[] getBytesMask(){
+		int y = Mask.intValue();
+		byte[] ret = new byte[4];
+		ret[3] = (new Integer(y & 0x000000ff)).byteValue();
+		ret[2] = (new Integer((y >> 8) & 0x000000ff)).byteValue();
+		ret[1] = (new Integer((y >> 16) & 0x000000ff)).byteValue();
+		ret[0] = (new Integer((y >> 24) & 0x000000ff)).byteValue();
+		return ret;
+	}
 }

@@ -101,7 +101,7 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
             }
         });
 
-        txtTipoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "3", "4", "5", "8", "11", "12", "13", "15" })); 
+        txtTipoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "3", "4", "5", "8", "11", "12", "13", "15", "17" })); 
         txtTipoICMP.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 txtTipoICMPFocusLost(evt);
@@ -308,7 +308,7 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
     	// "3", "4", "5", "8", "11", "12", "13", "15"
     	switch (Integer.parseInt(this.txtTipoICMP.getSelectedItem().toString())){
 			case 3:
-		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5" }));
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" }));
 		    	break;
 			case 4:
 		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
@@ -329,6 +329,9 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
 		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
 		    	break;
 			case 15:
+		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
+		    	break;
+			case 17:
 		    	txtCodigoICMP.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0" }));
 		    	break;
     	}
