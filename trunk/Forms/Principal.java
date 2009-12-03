@@ -183,7 +183,7 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
         txtConsolaEnvio.setFont(new java.awt.Font("Monospaced", 0, 12));
         txtConsolaEnvio.setRows(5);
         txtConsolaEnvio.setEnabled(true);
-        txtConsolaEnvio.setFocusable(false);
+        txtConsolaEnvio.setFocusable(true);
         jScrollPane2.setViewportView(txtConsolaEnvio);
 
         javax.swing.GroupLayout panlConsolaEnvioLayout = new javax.swing.GroupLayout(panlConsolaEnvio);
@@ -215,7 +215,7 @@ public class Principal extends javax.swing.JFrame implements ApplicationInterfac
         txtConsolaRecepcion.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         txtConsolaRecepcion.setRows(5);
         txtConsolaRecepcion.setEnabled(true);
-        txtConsolaRecepcion.setFocusable(false);
+        txtConsolaRecepcion.setFocusable(true);
         jScrollPane3.setViewportView(txtConsolaRecepcion);
 
         javax.swing.GroupLayout panelConsolaRecepcionLayout = new javax.swing.GroupLayout(panelConsolaRecepcion);

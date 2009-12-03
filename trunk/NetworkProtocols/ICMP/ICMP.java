@@ -11,32 +11,24 @@ import NetworkProtocols.IP.*;
 import NetworkProtocols.IP.Address.*;
 
 public class ICMP implements ProtocolInterface, ICMPInterface {
-	static Queue buffRem; // Buffer de entrada remota a ICMP, lo llenan las
-							// interfaces
-	static Queue buffLoc; // Buffer de entrada local a ICMP, lo llenan las apps
-							// o ICMP
+	static Queue buffRem; // Buffer de entrada remota a ICMP
+	static Queue buffLoc; // Buffer de entrada local a ICMP
 	private IP ip;
 	@SuppressWarnings("unused")
 	private Reader rdr;
 	private int msgId = 0;
 	
-//	public ICMP(Interfaces ifs, NetworkProtocols nt) throws NodeException {
-//	}
-
 	// Metodo invocado por IP agregar un evento a la cola remota
 	public void addRem(eventoN3 x) {
 		buffRem.pushBack(x);
 	}
 
-	// Metodo invocado por el nivel superior o IP para agregar un evento a la cola
-	// local
+	// Metodo invocado por el nivel superior o IP para agregar un evento a la cola local
 	public void addLoc(eventoN3 x) {
 		buffLoc.pushBack(x);
 	}
 
-	// //////////////////////////////////////////////////////////////
-
-	public ICMP(){//IP ip) {
+	public ICMP(){
 		NetworkProtocols.addProtocol(NetworkProtocols.PROTO_ICMP, this);
 		this.ip = (IP) NetworkProtocols.getProtocol(NetworkProtocols.PROTO_IP);
 		buffRem = new Queue();
@@ -44,19 +36,16 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		this.rdr = new Reader(this);
 	}
 
-	public boolean handle(eventoN3 p) { // Es invocado cuando IP recibe un
-										// datagram que corresponde a ICMP
+	public boolean handle(eventoN3 p) { // Es invocado cuando IP recibe un datagram que corresponde a ICMP
 		ICMPMessage icmpmsg = null;
 		try {
 			icmpmsg = new ICMPMessage(p);
 		} catch (MalformedPacketException e) {
 			e.printStackTrace();
-			return false; // El paquete recibido estaba mal formado o no era un
-							// paquete ICMP
+			return false; // El paquete recibido estaba mal formado o no era un paquete ICMP
 		}
 		System.out.println("Se encontro un paquete ICMP en la cola remota");
 		Principal.addReceived("Se encontro un paquete ICMP en la cola remota\n");
-//				+ icmpmsg.getSourceAdrr());
 		switch (icmpmsg.type) {
 			case ICMPMessage.ECHO_REQUEST: {
 				System.out.println("Paquete ICMP: " + icmpmsg.toString());
@@ -71,8 +60,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 					datagram.setsourceAddress(datagram.getDestAddress());
 					datagram.setDestAddress(auxSrc);
 					datagram.setData(rp.toByteArray());
-					// El resto de los campos teoricamente los completa IP antes de
-					// mandar el datagram.
+					// El resto de los campos teoricamente los completa IP antes de mandar el datagram.
 					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
 					ip.addLoc(evReply);
 				} catch (Exception e) {
@@ -153,8 +141,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 					datagram.setsourceAddress(datagram.getDestAddress());
 					datagram.setDestAddress(auxSrc);
 					datagram.setData(rp.toByteArray());
-					// El resto de los campos teoricamente los completa IP antes de
-					// mandar el datagram.
+					// El resto de los campos teoricamente los completa IP antes de mandar el datagram.
 					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
 					ip.addLoc(evReply);
 				} catch (Exception e) {
@@ -186,8 +173,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 					datagram.setsourceAddress(datagram.getDestAddress());
 					datagram.setDestAddress(auxSrc);
 					datagram.setData(rp.toByteArray());
-					// El resto de los campos teoricamente los completa IP antes de
-					// mandar el datagram.
+					// El resto de los campos teoricamente los completa IP antes de mandar el datagram.
 					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
 					ip.addLoc(evReply);
 				} catch (Exception e) {
@@ -219,8 +205,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 					datagram.setsourceAddress(datagram.getDestAddress());
 					datagram.setDestAddress(auxSrc);
 					datagram.setData(rp.toByteArray());
-					// El resto de los campos teoricamente los completa IP antes de
-					// mandar el datagram.
+					// El resto de los campos teoricamente los completa IP antes de mandar el datagram.
 					eventoN3 evReply = new eventoN3(eventoN3.SEND, datagram);
 					ip.addLoc(evReply);
 				} catch (Exception e) {
@@ -261,15 +246,6 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	public void send(byte type, byte code, IpAddress dest, Datagram data) {
 		ICMPMessage icmpp = new ICMPMessage();
 		switch (type) {
-			/*   El caso del echo reply no se da en el send ya que se envia automaticamente
-			 *   cuando se recibe el echo request
-			case ICMP.ECHO_REPLY: {
-				System.out.println("Envio de mensaje ICMP ECHO_REPLY, tipo " + type + " código " + code);
-				
-			}
-				;
-				break;
-			*/
 			case ICMP.DESTINATION_UNREACHABLE: {
 				System.out.println("Envio de mensaje ICMP DESTINATION_UNREACHABLE, tipo " + type + " código " + code + " direccion " + dest.toString());
 				Principal.addSended("Envio de mensaje ICMP DESTINATION_UNREACHABLE, tipo " + type + " código " + code + " direccion " + dest.toString() + "\n");
@@ -325,7 +301,6 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			case ICMP.ROUTER_ADVERT: {
 				System.out.println("Envio de mensaje ICMP ROUTER_ADVERT, tipo " + type + " código " + code);
 				Principal.addSended("Envio de mensaje ICMP ROUTER_ADVERT, tipo " + type + " código " + code + "\n");
-				//Falta implementacion
 			}
 				;
 				break;
@@ -333,7 +308,6 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			case ICMP.ROUTER_SOLICIT: {
 				System.out.println("Envio de mensaje ICMP ROUTER_SOLICIT, tipo " + type + " código " + code);
 				Principal.addSended("Envio de mensaje ICMP ROUTER_SOLICIT, tipo " + type + " código " + code + "\n");
-				//Falta implementacion
 			}
 				;
 				break;
@@ -364,14 +338,11 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				icmpp.identificador[1] = 0x00;
 				icmpp.nroSecuencia[0] = 0x00;
 				icmpp.nroSecuencia[1] = 0x00;
-
 				icmpp.marcaTiempoOrigen = new byte[4];
-				
 				Long m = System.currentTimeMillis();
 				for(int i= 0; i < 4; i++){  
 					icmpp.marcaTiempoOrigen[3 - i] = (byte)(m >>> (i * 8));  
 				}  
-
 				icmpp.marcaTiempoRecepcion = new byte[4];
 				icmpp.marcaTiempoRecepcion[0] = 0x00;
 				icmpp.marcaTiempoRecepcion[1] = 0x00;
@@ -385,18 +356,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 			}
 				;
 				break;
-				
-			/*Timestamp Reply se genera automaticamente en ICMPMessage cuando se detecta
-			 * Un Timestamp Request	
-			 *
-			case ICMP.TIMESTAMP_REPLY: {
-				System.out.println("Envio de mensaje ICMP TIMESTAMP_REPLY, tipo " + type + " código " + code);
-	
-			}
-				;
-				break;
-			*/
-				
+
 			case ICMP.INFORMATION_REQUEST: {
 				System.out.println("Envio de mensaje ICMP INFORMATION_REQUEST, tipo " + type + " código " + code);
 				Principal.addSended("Envio de mensaje ICMP INFORMATION_REQUEST, tipo " + type + " código " + code + "\n");
@@ -440,16 +400,6 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				;
 				break;
 
-				/*INFORMATION_REPLY se genera automaticamente en ICMPMessage cuando se detecta
-				 * Un INFORMATION Request	
-				 *
-			case ICMP.INFORMATION_REPLY: {
-				System.out.println("Envio de mensaje ICMP INFORMATION_REPLY, tipo " + type + " código " + code);
-	
-			}
-				;
-				break;
-				 */
 			default: {
 				System.out
 						.println("El envio de mensaje ICMP fallo. No se encontro el tipo de mensaje. Tipo " + type + " código " + code);
@@ -457,7 +407,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				return;
 			}
 		}
-		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
+		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS
 		if (type != ICMP.ECHO_REQUEST) {
 			Datagram datagram = new Datagram(data.getVersion(), data.getHeaderLength(), data.getPrecedence(), data.isDelay(), data.isThroughput(), 
 					data.isReliability(), data.isCost(), data.isFlags_nousado(), data.getTotalLength(), data.getDatagramId(), data.isFlags_nousado(), 
@@ -502,7 +452,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 				return;
 			}
 		}
-		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
+		// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS
 		Datagram datagram = new Datagram(36);
 		datagram.setDestAddress(data.getSourceAddress()); //La direccion origen del datagram original es la destino de este
 		datagram.setsourceAddress(this.ip.getLocalIpAddress());
@@ -523,7 +473,6 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		icmpmsg.datosEcho = new byte[20];
 		for (int i = 0; i < 20; i++)
 			icmpmsg.datosEcho[i] = 0x55; //completamos el mensaje con 01010101 por cada byte
-		//icmpmsg.update();
 		try {
 			// CREAR EL DATAGRAM A MANDAR CON SUS RESPECTIVOS CAMPOS.
 			Datagram datagram = new Datagram(28);
@@ -545,13 +494,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		}
 	}
 
-	
-	
-	//COMPLETAR CORRECTAMENTE LOS METODOS INFERIORES
-	
-	
-	// Procesa un requerimiento de envio u otro del nivel superior. Recibe en un
-	// byte la info de
+	// Procesa un requerimiento de envio u otro del nivel superior. Recibe en un byte la info
 	//Este evento es llamado por el thread de lectura de las colas remotas y locales.
 	//Cada vez q se encuentra algun elemento en la cola, el thread lo pasa a este metodo.
 
@@ -560,11 +503,8 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		Principal.addSended("Encontro requerimiento ICMP en cola local\n");
 		// Segun la primitiva recibida, toma la accion que corresponda
 		int opcion = pack.getControl();
-		// Ver que es lo que hace esto porq no hace nada...
-		// byte[] bb = (byte[]) idu.getInfo();
 		switch (opcion) {
 		case eventoN3.SEND: // Recibe info para enviar
-			// aca se debria ver el nexthop, la interfaz, mtu, fragmentar, etc
 			System.out.println("ICMP envía la informacion de la cola");
 			Principal.addSended("ICMP envía la informacion de la cola\n");
 			ICMPPacketSend infoSend = (ICMPPacketSend) pack.getInfo();
@@ -595,8 +535,7 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		Principal.addReceived("Encontro requerimiento en cola remota de ICMP\n");
 		// Segun la primitiva recibida, toma la accion que corresponda
 		switch (opcion) {
-		case eventoN3.INFO_RECEIVED: // Recepcion de un frame link layer con
-										// indicacion de
+		case eventoN3.INFO_RECEIVED:
 			handle(indN2);
 			break;
 		default:
@@ -610,9 +549,8 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 	//READER DE LAS COLAS DE PEDIDOS
 	class Reader extends Thread {
 		ICMP icmp; // Instancia ICMP
-		eventoN3 inforem;// info remota recibida(buffInp), un datagram mas otras
-							// cosas
-		eventoN3 infoloc;// info local recibida por IP
+		eventoN3 inforem;// info remota recibida
+		eventoN3 infoloc;// info local recibida
 
 		public Reader(ICMP icmp) {
 			this.icmp = icmp;
@@ -628,20 +566,12 @@ public class ICMP implements ProtocolInterface, ICMPInterface {
 		// de la linea o de los req del nivel superior
 		public void run() {
 			while (true) {
-				// Si hay info en la cola de entrada remota, nivel inferior,
-				// procesa
-				// Esto hay q cambiarlo y recibir algo mas general que sea una
-				// primitiva, y
-				// despues discriminar si es p.ej un request o un response, etc
+				// Si hay info en la cola de entrada remota, nivel inferior, procesa
 				if ((inforem = (eventoN3) buffRem.peekpopBack()) != null) {
-					// Obtiene la info de control de la interfaz y el objeto
-					// remoto
 					icmp.receive_rem(inforem);
 				}
-				// Si hay info en la cola de entrada local, nivel superior,
-				// procesa
+				// Si hay info en la cola de entrada local, nivel superior, procesa
 				if ((infoloc = (eventoN3) buffLoc.peekpopBack()) != null) {
-					// recibe req de n4
 					icmp.receive_loc(infoloc);
 				}
 			}

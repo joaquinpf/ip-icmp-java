@@ -151,17 +151,13 @@ class ICMPMessage implements ICMPInterface {
 					;
 					break;
 				case ICMP.ROUTER_ADVERT: {
-					
-					
-					//Mirar porq falta el detalle del mensaje
+					//Opcional, no implementado en este caso ya que es obsoleto
 				}
 					;
 					break;
 		
 				case ICMP.ROUTER_SOLICIT: {
-					
-					
-					//Mirar porq falta el detalle del mensaje
+					//Opcional, no implementado en este caso ya que es obsoleto
 				}
 					;
 					break;
@@ -335,12 +331,8 @@ class ICMPMessage implements ICMPInterface {
 		this.update();
 		return data.clone();
 	}
-/*
-	public IpAddress getSourceAdrr() {
-		return src;
-	}
-*/
-	//Crea el mensaje ICMP a enviar. Lo 
+
+	//Crea el mensaje ICMP a enviar.
 	public void update() {
 		data[0] = type;
 		data[1] = code;
@@ -392,13 +384,13 @@ class ICMPMessage implements ICMPInterface {
 				break;
 	
 			case ICMP.ROUTER_ADVERT: {
-				//Este mensaje no esta implementado debido a q es opcional
+				//Opcional, no implementado en este caso ya que es obsoleto
 			}
 				;
 				break;
 	
 			case ICMP.ROUTER_SOLICIT: {
-				//Este mensaje no esta implementado debido a q es opcional
+				//Opcional, no implementado en este caso ya que es obsoleto
 			}
 				;
 				break;
@@ -746,10 +738,6 @@ class ICMPMessage implements ICMPInterface {
 			return true;
 		else
 			return false;
-	}
-	
-	public byte[] getMessage(){
-		return toByteArray();
 	}
 	
 	public String toByteValueString(byte[] val){
