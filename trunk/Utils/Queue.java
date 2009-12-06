@@ -88,6 +88,7 @@ public class Queue {
 		return m_size;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Enumeration elements() {
 		return new QueueEnumeration(this);
 	}
@@ -106,6 +107,7 @@ class QueueItem {
 
 }
 
+@SuppressWarnings("unchecked")
 class QueueEnumeration implements Enumeration {
 
 	private QueueItem current;

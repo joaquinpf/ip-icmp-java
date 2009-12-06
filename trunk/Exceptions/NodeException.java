@@ -1,6 +1,10 @@
 package Exceptions;
 
 public class NodeException extends Exception {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2355133663292625103L;
 	public static final int SOCKETERROR = 5;
 	public static final int ADDRESSERROR = 10;
 	public static final int UNKNOWNHOST = 3;
